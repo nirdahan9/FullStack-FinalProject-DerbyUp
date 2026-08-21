@@ -1,0 +1,644 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.15"
+  }
+  public: {
+    Tables: {
+      bridge_players: {
+        Row: {
+          id: string
+          name: string
+          normalized_name: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          normalized_name: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          normalized_name?: string
+        }
+        Relationships: []
+      }
+      competitions: {
+        Row: {
+          country: string
+          id: number
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          season: number
+        }
+        Insert: {
+          country: string
+          id: number
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          season: number
+        }
+        Update: {
+          country?: string
+          id?: number
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          season?: number
+        }
+        Relationships: []
+      }
+      daily_puzzles: {
+        Row: {
+          club_a: string
+          club_b: string
+          created_at: string
+          id: string
+          play_date: string
+          valid_answers: Json
+        }
+        Insert: {
+          club_a: string
+          club_b: string
+          created_at?: string
+          id?: string
+          play_date: string
+          valid_answers: Json
+        }
+        Update: {
+          club_a?: string
+          club_b?: string
+          created_at?: string
+          id?: string
+          play_date?: string
+          valid_answers?: Json
+        }
+        Relationships: []
+      }
+      games: {
+        Row: {
+          away_logo: string | null
+          away_team: string
+          competition_id: number
+          fixture_id: number
+          home_logo: string | null
+          home_team: string
+          id: string
+          kickoff_at: string
+          score_away: number | null
+          score_home: number | null
+          settled_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          away_logo?: string | null
+          away_team: string
+          competition_id: number
+          fixture_id: number
+          home_logo?: string | null
+          home_team: string
+          id?: string
+          kickoff_at: string
+          score_away?: number | null
+          score_home?: number | null
+          settled_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          away_logo?: string | null
+          away_team?: string
+          competition_id?: number
+          fixture_id?: number
+          home_logo?: string | null
+          home_team?: string
+          id?: string
+          kickoff_at?: string
+          score_away?: number | null
+          score_home?: number | null
+          settled_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "games_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      league_members: {
+        Row: {
+          id: string
+          joined_at: string
+          league_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          league_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          league_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "league_members_league_id_fkey"
+            columns: ["league_id"]
+            isOneToOne: false
+            referencedRelation: "leagues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "league_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leagues: {
+        Row: {
+          competition_id: number
+          created_at: string
+          creator_id: string
+          description: string | null
+          featured_bonus_pct: number
+          featured_game_id: string | null
+          id: string
+          invite_code: string
+          name: string
+          prize_note: string | null
+          prizes: Json | null
+          status: string
+        }
+        Insert: {
+          competition_id: number
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          featured_bonus_pct?: number
+          featured_game_id?: string | null
+          id?: string
+          invite_code: string
+          name: string
+          prize_note?: string | null
+          prizes?: Json | null
+          status?: string
+        }
+        Update: {
+          competition_id?: number
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          featured_bonus_pct?: number
+          featured_game_id?: string | null
+          id?: string
+          invite_code?: string
+          name?: string
+          prize_note?: string | null
+          prizes?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leagues_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leagues_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leagues_featured_game_id_fkey"
+            columns: ["featured_game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link_url: string | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link_url?: string | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link_url?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      predictions: {
+        Row: {
+          bonus_pct: number
+          cancelled_at: string | null
+          id: string
+          odds: number
+          points_earned: number | null
+          predicted_at: string
+          question_id: string
+          selected_outcome: string
+          settled_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          bonus_pct?: number
+          cancelled_at?: string | null
+          id?: string
+          odds: number
+          points_earned?: number | null
+          predicted_at?: string
+          question_id: string
+          selected_outcome: string
+          settled_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          bonus_pct?: number
+          cancelled_at?: string | null
+          id?: string
+          odds?: number
+          points_earned?: number | null
+          predicted_at?: string
+          question_id?: string
+          selected_outcome?: string
+          settled_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "predictions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "predictions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          total_correct: number
+          total_points: number
+          total_predictions: number
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          total_correct?: number
+          total_points?: number
+          total_predictions?: number
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          total_correct?: number
+          total_points?: number
+          total_predictions?: number
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      puzzle_attempts: {
+        Row: {
+          answer: string
+          attempt_number: number
+          created_at: string
+          id: string
+          is_correct: boolean
+          points_earned: number
+          puzzle_id: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          attempt_number: number
+          created_at?: string
+          id?: string
+          is_correct: boolean
+          points_earned?: number
+          puzzle_id: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          attempt_number?: number
+          created_at?: string
+          id?: string
+          is_correct?: boolean
+          points_earned?: number
+          puzzle_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "puzzle_attempts_puzzle_id_fkey"
+            columns: ["puzzle_id"]
+            isOneToOne: false
+            referencedRelation: "daily_puzzles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "puzzle_attempts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
+        Row: {
+          correct_outcome: string | null
+          created_at: string
+          game_id: string
+          id: string
+          outcomes: Json
+          resolved_at: string | null
+          type: string
+        }
+        Insert: {
+          correct_outcome?: string | null
+          created_at?: string
+          game_id: string
+          id?: string
+          outcomes: Json
+          resolved_at?: string | null
+          type: string
+        }
+        Update: {
+          correct_outcome?: string | null
+          created_at?: string
+          game_id?: string
+          id?: string
+          outcomes?: Json
+          resolved_at?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_achievements: {
+        Row: {
+          achievement_key: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          achievement_key: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          achievement_key?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      cancel_prediction: { Args: { p_id: string }; Returns: undefined }
+      get_global_leaderboard: {
+        Args: { p_limit: number; p_offset: number }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          total_points: number
+        }[]
+      }
+      is_league_member: { Args: { p_league_id: string }; Returns: boolean }
+      shares_league_with: { Args: { p_user_id: string }; Returns: boolean }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
