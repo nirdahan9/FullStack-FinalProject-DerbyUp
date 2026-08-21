@@ -66,3 +66,4 @@ yarn-error.log*
 !.vscode/extensions.json
 # (Vercel CLI appends `.env*` here; the Secrets block above already
 #  covers it and keeps the !.env.example negation effective.)
+coverage/
