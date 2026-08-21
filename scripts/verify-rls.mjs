@@ -55,7 +55,7 @@ const { data: aSeesProfiles } = await A.from('profiles').select('id');
 ok('א׳ רואה רק את הפרופיל של עצמו', aSeesProfiles?.length === 1 && aSeesProfiles[0].id === users[0].id,
    `(רואה ${aSeesProfiles?.length})`);
 
-const { error: upErr } = await A.from('profiles')
+await A.from('profiles')
   .update({ display_name: 'hacked' }).eq('id', users[1].id).select();
 const { data: bName } = await admin.from('profiles').select('display_name').eq('id', users[1].id).single();
 ok('א׳ לא יכול לשנות את הפרופיל של ב׳', bName.display_name !== 'hacked');

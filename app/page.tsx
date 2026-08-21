@@ -1,22 +1,29 @@
-import { Trophy, Target, Users } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Target, Trophy, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 /**
- * Temporary landing page for stage 0. Its only job is to prove the design
- * system carried over: Heebo, the DerbyUp green, the 24px radius, the
- * card-kickoff surface, RTL layout, and both colour schemes.
- * The real landing page is built in a later stage.
+ * Landing page. Still provisional — the business-value copy is written
+ * properly once the product flows exist — but it now routes into auth.
  */
 export default function Home() {
   return (
     <main className="min-h-dvh bg-background px-5 py-10">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
         <header className="flex items-center justify-between">
-          <div className="flex flex-col gap-1">
-            <span className="section-label">RUNI CS 2026</span>
-            <h1 className="text-3xl font-black text-foreground">DerbyUp</h1>
+          <div className="flex items-center gap-2">
+            <Image
+              src="/kickoff_logo_cropped.png"
+              alt=""
+              width={28}
+              height={28}
+              className="h-6 w-auto"
+              priority
+            />
+            <span className="text-2xl font-black tracking-tight">DerbyUp</span>
           </div>
           <ThemeToggle />
         </header>
@@ -66,18 +73,13 @@ export default function Home() {
         </section>
 
         <div className="flex flex-wrap gap-3">
-          <Button size="lg">התחלה</Button>
-          <Button size="lg" variant="outline">
-            מידע נוסף
+          <Button size="lg" className="font-bold" asChild>
+            <Link href="/signup">פתיחת חשבון</Link>
           </Button>
-          <Button size="lg" variant="secondary">
-            כפתור משני
+          <Button size="lg" variant="outline" className="font-bold" asChild>
+            <Link href="/login">התחברות</Link>
           </Button>
         </div>
-
-        <p className="text-center text-xs text-muted-foreground">
-          שלב 0 · מערכת העיצוב הועתקה מ־bet-joy-league-hub
-        </p>
       </div>
     </main>
   );
