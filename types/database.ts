@@ -295,6 +295,7 @@ export type Database = {
           cancelled_at: string | null
           id: string
           odds: number
+          odds_provisional: boolean
           points_earned: number | null
           predicted_at: string
           question_id: string
@@ -308,6 +309,7 @@ export type Database = {
           cancelled_at?: string | null
           id?: string
           odds: number
+          odds_provisional?: boolean
           points_earned?: number | null
           predicted_at?: string
           question_id: string
@@ -321,6 +323,7 @@ export type Database = {
           cancelled_at?: string | null
           id?: string
           odds?: number
+          odds_provisional?: boolean
           points_earned?: number | null
           predicted_at?: string
           question_id?: string
@@ -436,6 +439,7 @@ export type Database = {
           created_at: string
           game_id: string
           id: string
+          odds_provisional: boolean
           outcomes: Json
           resolved_at: string | null
           type: string
@@ -445,6 +449,7 @@ export type Database = {
           created_at?: string
           game_id: string
           id?: string
+          odds_provisional?: boolean
           outcomes: Json
           resolved_at?: string | null
           type: string
@@ -454,6 +459,7 @@ export type Database = {
           created_at?: string
           game_id?: string
           id?: string
+          odds_provisional?: boolean
           outcomes?: Json
           resolved_at?: string | null
           type?: string

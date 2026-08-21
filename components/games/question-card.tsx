@@ -32,6 +32,7 @@ export function QuestionCard({
   existing,
   locked,
   lockReason,
+  provisional,
 }: {
   questionId: string;
   type: string;
@@ -40,6 +41,8 @@ export function QuestionCard({
   existing: { id: string; outcome: string; status: string } | null;
   locked: boolean;
   lockReason?: string;
+  /** The fixture is not priced yet; these numbers are placeholders. */
+  provisional: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const [current, setCurrent] = useState(existing);
@@ -53,7 +56,11 @@ export function QuestionCard({
       const result = await makePrediction({ questionId, outcome: outcome.key });
       if (!result.ok) return void toast.error(result.error);
       setCurrent({ id: result.data.predictionId, outcome: outcome.key, status: "pending" });
-      toast.success(`ניחשת. אם תצדק תקבל ${result.data.points} נקודות`);
+      toast.success(
+        result.data.provisional
+          ? "ניחשת. הניקוד ייקבע לפי היחס בשריקת הפתיחה"
+          : `ניחשת. אם תצדק תקבל ${result.data.points} נקודות`,
+      );
     });
   }
 
@@ -71,12 +78,26 @@ export function QuestionCard({
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-base font-bold">{TITLES[type] ?? type}</h3>
-        {bonusPct > 0 && (
-          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">
-            בונוס {bonusPct}%
-          </span>
-        )}
+        <span className="flex shrink-0 items-center gap-1.5">
+          {provisional && (
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-bold text-muted-foreground">
+              יחס משוער
+            </span>
+          )}
+          {bonusPct > 0 && (
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">
+              בונוס {bonusPct}%
+            </span>
+          )}
+        </span>
       </div>
+
+      {provisional && !locked && (
+        <p className="text-xs text-muted-foreground">
+          היחסים למשחק הזה עדיין לא פורסמו. אפשר לנחש כבר עכשיו — הניקוד ייקבע
+          לפי היחס בשריקת הפתיחה, אותו יחס לכולם.
+        </p>
+      )}
 
       {locked && !current ? (
         <p className="flex items-center gap-1 text-xs text-muted-foreground">

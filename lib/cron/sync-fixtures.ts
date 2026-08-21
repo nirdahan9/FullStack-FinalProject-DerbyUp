@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchFixtures, fetchOdds } from "@/lib/football-api/client";
-import { buildQuestions } from "@/lib/football-api/mapping";
+import { buildQuestions, DEFAULT_ODDS } from "@/lib/football-api/mapping";
 import { COMPETITIONS } from "@/lib/football-api/types";
 
 /**
@@ -104,41 +104,56 @@ export async function syncFixtures(now = new Date()): Promise<SyncReport> {
         for (const [id, value] of priced) oddsByFixture.set(id, value);
       }
 
-      const pricedIds = new Set(pricedFixtures.map((f) => f.fixtureId));
+      // Every fixture gets questions, so the whole season is predictable.
+      // Those without a real price carry defaults and are marked provisional;
+      // settlement scores them at the price on the day instead.
+      type Row = {
+        game_id: string;
+        type: string;
+        outcomes: ReturnType<typeof buildQuestions>[number]["outcomes"];
+        odds_provisional: boolean;
+      };
+      const priced: Row[] = [];
+      const provisional: Row[] = [];
 
-      const rows = (games ?? []).flatMap((game) => {
-        // A fixture outside the window gets no questions yet. It still shows
-        // in the league calendar, marked as not open — which is honest, and
-        // avoids locking anybody into a made-up price.
-        if (!pricedIds.has(game.fixture_id)) return [];
-
-        const priced = oddsByFixture.get(game.fixture_id);
-        if (!priced?.complete) report.defaultsUsed += 1;
+      for (const game of games ?? []) {
+        const quote = oddsByFixture.get(game.fixture_id);
+        const isPriced = Boolean(quote?.complete);
+        if (!isPriced) report.defaultsUsed += 1;
 
         const questions = buildQuestions(
-          priced?.odds ?? {
-            home: 2.5, draw: 3.2, away: 2.8,
-            over: 1.9, under: 1.9, yes: 1.85, no: 1.95,
-          },
+          quote?.odds ?? DEFAULT_ODDS,
           { home: game.home_team, away: game.away_team },
         );
 
-        return questions.map((q) => ({
-          game_id: game.id,
-          type: q.type,
-          outcomes: q.outcomes,
-        }));
-      });
+        for (const q of questions) {
+          (isPriced ? priced : provisional).push({
+            game_id: game.id,
+            type: q.type,
+            outcomes: q.outcomes,
+            odds_provisional: !isPriced,
+          });
+        }
+      }
 
-      if (rows.length) {
-        // onConflict on (game_id, type) so a re-run refreshes prices for
-        // fixtures that have not started, and never creates duplicates.
-        const { error: qError } = await supabase
+      // Real prices overwrite whatever is there, so a fixture that has just
+      // been priced stops being provisional.
+      if (priced.length) {
+        const { error: e } = await supabase
           .from("questions")
-          .upsert(rows, { onConflict: "game_id,type" });
+          .upsert(priced, { onConflict: "game_id,type" });
+        if (e) report.errors.push(`${competition.name} questions: ${e.message}`);
+        else report.questions += priced.length;
+      }
 
-        if (qError) report.errors.push(`${competition.name} questions: ${qError.message}`);
-        else report.questions += rows.length;
+      // Placeholders are only inserted where nothing exists yet. Upserting them
+      // would overwrite a real price with a default on the next run.
+      if (provisional.length) {
+        const { error: e } = await supabase
+          .from("questions")
+          .upsert(provisional, { onConflict: "game_id,type", ignoreDuplicates: true });
+        if (e) report.errors.push(`${competition.name} placeholders: ${e.message}`);
+        else report.questions += provisional.length;
       }
     } catch (error) {
       // One competition failing must not abandon the rest — a bad response for

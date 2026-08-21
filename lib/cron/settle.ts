@@ -169,10 +169,25 @@ async function settleGame(
 ): Promise<string[]> {
   const { data: questions } = await supabase
     .from("questions")
-    .select("id, type")
+    .select("id, type, outcomes")
     .eq("game_id", game.id);
 
   if (!questions?.length) return [];
+
+  // Prices as they stand at settlement. A prediction made before the fixture
+  // was priced is scored from these rather than from the placeholder it froze,
+  // so predicting early is never worth more than predicting late.
+  const priceByQuestion = new Map(
+    questions.map((q) => [
+      q.id,
+      new Map(
+        (q.outcomes as unknown as { key: string; odds: number }[]).map((o) => [
+          o.key,
+          Number(o.odds),
+        ]),
+      ),
+    ]),
+  );
 
   const correctByQuestion = new Map(
     questions.map((q) => [q.id, resolveOutcome(q.type as QuestionType, scoreHome, scoreAway)]),
@@ -195,7 +210,7 @@ async function settleGame(
 
   const { data: predictions } = await supabase
     .from("predictions")
-    .select("id, user_id, selected_outcome, odds, bonus_pct, question_id")
+    .select("id, user_id, selected_outcome, odds, bonus_pct, question_id, odds_provisional")
     .in("question_id", [...correctByQuestion.keys()])
     .eq("status", "pending");
 
@@ -215,19 +230,34 @@ async function settleGame(
   // statement — but they are computed first and sent as a batch of updates
   // rather than a query per prediction.
   const updates = predictions.map((p) => {
+    // A provisional prediction takes the price at kickoff; a normal one keeps
+    // the price it froze. Falling back to the frozen value covers the case
+    // where a fixture was never priced at all.
+    const odds = p.odds_provisional
+      ? priceByQuestion.get(p.question_id)?.get(p.selected_outcome) ?? Number(p.odds)
+      : Number(p.odds);
+
     const result = settlePrediction(
-      { selectedOutcome: p.selected_outcome, odds: Number(p.odds), bonusPct: p.bonus_pct },
+      { selectedOutcome: p.selected_outcome, odds, bonusPct: p.bonus_pct },
       correctByQuestion.get(p.question_id)!,
     );
     users.add(p.user_id);
-    return { id: p.id, ...result };
+    return { id: p.id, ...result, odds };
   });
 
   await Promise.all(
     updates.map((u) =>
       supabase
         .from("predictions")
-        .update({ status: u.status, points_earned: u.pointsEarned, settled_at: now })
+        // The odds are written back too, so the history shows what a
+        // provisional prediction was actually scored at.
+        .update({
+          status: u.status,
+          points_earned: u.pointsEarned,
+          odds: u.odds,
+          odds_provisional: false,
+          settled_at: now,
+        })
         .eq("id", u.id),
     ),
   );

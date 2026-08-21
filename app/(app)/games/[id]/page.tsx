@@ -29,7 +29,7 @@ export default async function GamePage({
     await Promise.all([
       supabase
         .from("questions")
-        .select("id, type, outcomes, correct_outcome")
+        .select("id, type, outcomes, correct_outcome, odds_provisional")
         .eq("game_id", id)
         .order("type"),
       supabase
@@ -131,6 +131,7 @@ export default async function GamePage({
             }
             locked={locked}
             lockReason={lockReason}
+            provisional={q.odds_provisional}
           />
         );
       })}

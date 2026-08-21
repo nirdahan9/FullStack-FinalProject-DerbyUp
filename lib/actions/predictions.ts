@@ -29,7 +29,7 @@ function messageFor(reason: string): string {
 
 export async function makePrediction(
   input: { questionId: string; outcome: string },
-): Promise<ActionResult<{ predictionId: string; points: number }>> {
+): Promise<ActionResult<{ predictionId: string; points: number; provisional: boolean }>> {
   const parsed = makePredictionSchema.safeParse(input);
   if (!parsed.success) return actionError("קלט לא תקין");
 
@@ -43,7 +43,7 @@ export async function makePrediction(
   // domain rules get everything they need in one round trip.
   const { data: question } = await supabase
     .from("questions")
-    .select("id, type, outcomes, games(id, kickoff_at, status, competition_id)")
+    .select("id, type, outcomes, odds_provisional, games(id, kickoff_at, status, competition_id)")
     .eq("id", parsed.data.questionId)
     .maybeSingle();
 
@@ -107,6 +107,10 @@ export async function makePrediction(
       selected_outcome: parsed.data.outcome,
       odds: chosen.odds,
       bonus_pct: bonusPct,
+      // Carried from the question: if the fixture is not priced yet, this
+      // prediction is scored at the price on the day instead of at the
+      // placeholder shown now.
+      odds_provisional: question.odds_provisional,
     })
     .select("id")
     .single();
@@ -126,6 +130,7 @@ export async function makePrediction(
     data: {
       predictionId: created.id,
       points: pointsForCorrectPrediction(chosen.odds, bonusPct),
+      provisional: question.odds_provisional,
     },
   };
 }
