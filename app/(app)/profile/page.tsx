@@ -1,6 +1,7 @@
 import { Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/layout/sign-out-button";
+import { EditNameForm } from "@/components/layout/edit-name-form";
 import { ACHIEVEMENTS } from "@/lib/domain/achievements";
 
 export default async function ProfilePage() {
@@ -32,6 +33,8 @@ export default async function ProfilePage() {
           {profile?.display_name ?? profile?.username}
         </h1>
       </div>
+
+      <EditNameForm current={profile?.display_name ?? profile?.username ?? ""} />
 
       <div className="grid grid-cols-3 gap-2">
         {[
