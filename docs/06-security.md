@@ -1,7 +1,7 @@
 # מסמך אבטחה בסיסית — DerbyUp
 
 **פרויקט סיום · Internet Technologies · RUNI CS 2026**
-**מחבר:** ניר דהן · **גרסה:** 1.0 (תכנון) · **תאריך:** 21.8.2026
+**מחבר:** ניר דהן · **גרסה:** 2.0 (תכנון) · **תאריך:** 21.8.2026
 
 > ⚠️ **סטטוס המסמך:** נכתב בשלב התכנון ומנסח **התחייבויות אבטחה** שעל בסיסן נכתב הקוד.
 > אחרי המימוש יתווסף סעיף 11 עם **אימות בפועל** — תוצאות בדיקות ה-RLS מ-[04-test-spec.md](04-test-spec.md) §5.
@@ -15,7 +15,7 @@
 | # | תוקף | מה הוא רוצה | חומרה |
 |---|---|---|---|
 | 1 | **עובד סקרן** | לראות ניחושים של עמיתים לפני נעילה | 🟡 בינוני |
-| 2 | **עובד תחרותי** | לשנות לעצמו נקודות או לבטל הפסד | 🔴 גבוה |
+| 2 | **עובד תחרותי** | לשנות לעצמו נקודות, לשנות ניחוש בדיעבד, או לנחש אחרי הפתיחה | 🔴 גבוה |
 | 3 | **עובד שנוגע ב-DevTools** | לעקוף ולידציות של הדפדפן | 🔴 גבוה |
 | 4 | **גורם חיצוני** | גישה לנתוני הארגון | 🔴 גבוה |
 | 5 | **סורק אוטומטי** | ניצול חולשות גנריות | 🟡 בינוני |
@@ -36,7 +36,7 @@
 | שלב | מה קורה |
 |---|---|
 | הרשמה | Supabase מגבב את הסיסמה ב-**bcrypt** ושומר ב-`auth.users` |
-| | טריגר `on_auth_user_created` יוצר פרופיל + 500 נקודות |
+| | טריגר `on_auth_user_created` יוצר פרופיל (0 נקודות — אין מענק) |
 | התחברות | אימות מול Supabase → **JWT** חתום |
 | שמירת session | ה-JWT ב-cookie **httpOnly · secure · sameSite** |
 | רענון | `middleware.ts` מרענן את ה-token בכל בקשה |
@@ -87,12 +87,11 @@
 ### 3.3 RLS — הליבה
 
 ```sql
-alter table bets              enable row level security;
+alter table predictions       enable row level security;
 alter table profiles          enable row level security;
 alter table leagues           enable row level security;
 alter table league_members    enable row level security;
 alter table notifications     enable row level security;
-alter table point_transactions enable row level security;
 alter table puzzle_attempts   enable row level security;
 alter table user_achievements enable row level security;
 ```
@@ -100,22 +99,44 @@ alter table user_achievements enable row level security;
 **ניחושים — קריאה ויצירה של הבעלים בלבד, ללא שינוי או מחיקה:**
 
 ```sql
-create policy "bets_select_own" on bets
+create policy "predictions_select_own" on predictions
   for select using (auth.uid() = user_id);
 
-create policy "bets_insert_own" on bets
+create policy "predictions_insert_own" on predictions
   for insert with check (auth.uid() = user_id);
 
 -- אין policy ל-UPDATE ולא ל-DELETE:
--- משתמש אינו יכול לשנות או למחוק ניחוש. היישוב מתבצע ב-service role.
+-- משתמש אינו יכול לשנות או למחוק ניחוש ישירות.
+-- היישוב מתבצע ב-service role; הביטול דרך פונקציית SECURITY DEFINER.
 ```
 
-**תנועות נקודות — קריאה בלבד. אין policy לכתיבה כלל:**
+**ביטול ניחוש — למה זה לא נעשה ב-policy:**
+
+המוצר מאפשר ביטול ניחוש עד 10 דקות לפני שריקת הפתיחה. היה מתבקש לאפשר זאת דרך
+policy ל-`UPDATE`, אך זו הייתה טעות אבטחה:
+
+| הבעיה ב-policy | ההשלכה |
+|---|---|
+| policy מתירה `UPDATE` על השורה | המשתמש יכול לשנות גם `odds`, `selected_outcome` או `points_earned` |
+| אין דרך לאכוף את חלון הזמן ב-policy בלבד | ביטול אחרי שהמשחק התחיל |
+| אין אטומיות | מצבי מרוץ בין ביטול לניחוש חדש |
+
+> 🔴 **הסיכון החמור ביותר:** אילו הייתה policy ל-`UPDATE`, משתמש היה יכול לשנות את
+> `selected_outcome` **אחרי** שהמשחק הסתיים, או לכתוב לעצמו `points_earned` גבוה.
+> **הניקוד הוא הפרס** — ולכן הוא חייב להיות בלתי ניתן לעריכה מצד הלקוח.
+
+לכן `predictions` נותרת **חסומה לחלוטין לכתיבה ישירה**, והביטול מתבצע דרך
+`cancel_prediction(id)` — פונקציית `SECURITY DEFINER` שמאמתת בעלות, סטטוס וחלון זמן,
+ומשנה **רק את הסטטוס**, עם `FOR UPDATE`. **המשתמש לא יכול לגעת בשורה — רק לבקש
+מהמערכת לבטל אותה לפי הכללים.**
+
+**ניסיונות באתגר — קריאה ויצירה של הבעלים; הניקוד נקבע בשרת:**
 
 ```sql
-create policy "tx_select_own" on point_transactions
+create policy "attempts_select_own" on puzzle_attempts
   for select using (auth.uid() = user_id);
--- כתיבה מתבצעת אך ורק בשרת ב-service role
+-- אין policy ל-INSERT: הניסיון נרשם בשרת אחרי בדיקת התשובה,
+-- אחרת המשתמש היה כותב לעצמו points_earned כרצונו.
 ```
 
 **ליגות — רק ליגות שהמשתמש חבר בהן:**
@@ -161,28 +182,34 @@ create policy "profiles_update_own" on profiles
   for update using (auth.uid() = id);
 ```
 
-### 3.4 מניעת שינוי יתרה — נקודה קריטית
+### 3.4 מניעת שינוי ניקוד — נקודה קריטית
 
-ל-`profiles` יש policy ל-`UPDATE`, ולכאורה משתמש יכול לשנות את `points_balance` שלו.
-המניעה בטריגר:
+ל-`profiles` יש policy ל-`UPDATE` (לעריכת שם ואווטאר), ולכאורה משתמש יכול לשנות גם את
+`total_points` שלו. המניעה בטריגר:
 
 ```sql
-create function prevent_balance_tampering() returns trigger
+create function prevent_score_tampering() returns trigger
 language plpgsql as $$
 begin
-  if new.points_balance is distinct from old.points_balance then
-    raise exception 'points_balance cannot be modified directly';
+  if new.total_points      is distinct from old.total_points
+  or new.total_predictions is distinct from old.total_predictions
+  or new.total_correct     is distinct from old.total_correct then
+    raise exception 'score columns cannot be modified directly';
   end if;
   return new;
 end; $$;
 
-create trigger profiles_protect_balance
+create trigger profiles_protect_score
   before update on profiles for each row
-  when (current_setting('role') <> 'service_role')
-  execute function prevent_balance_tampering();
+  execute function prevent_score_tampering();
 ```
 
-המשתמש יכול לעדכן שם ואווטאר — **אך לא את היתרה**. עדכון היתרה מתבצע רק בשרת.
+המשתמש יכול לעדכן **שם ואווטאר בלבד**. עמודות הניקוד מתעדכנות אך ורק ביישוב, שרץ
+ב-service role ועוקף את הטריגר.
+
+> **למה זה מספיק:** גם אם משתמש ישנה את `total_points`, זהו רק **מטמון**. הדירוג בליגה
+> **מחושב מהניחושים עצמם** ולא מהעמודה הזו — ולכן זיוף המטמון לא ישנה את הטבלה.
+> זו הגנת עומק שנובעת מהחלטה ארכיטקטונית, לא מהגנה נקודתית.
 
 ---
 
@@ -194,11 +221,13 @@ create trigger profiles_protect_balance
 | הרשמה / התחברות | ✅ | — | — |
 | צפייה במשחקים | ❌ | ✅ | ✅ |
 | **הנחת ניחוש** | ❌ | ✅ | ✅ |
+| **ביטול ניחוש** (עד 10 דק') | ❌ | ✅ (רק שלו) | ✅ (רק שלו) |
 | יצירה / הצטרפות לליגה | ❌ | ✅ | ✅ |
 | צפייה בטבלת דירוג | ❌ | ✅ (בליגות שלו) | ✅ |
 | אתגר יומי | ❌ | ✅ | ✅ |
 | **בחירת משחקים לליגה** | ❌ | ❌ | ✅ (בליגה שלו) |
 | **סימון משחק שבוע** | ❌ | ❌ | ✅ (בליגה שלו) |
+| **עדכון פרסי הליגה** | ❌ | ❌ | ✅ (בליגה שלו) |
 | **יישוב ידני** | ❌ | ❌ | ✅ (בליגה שלו) |
 | הרצת cron | ❌ | ❌ | ❌ (secret בלבד) |
 
@@ -213,12 +242,12 @@ create trigger profiles_protect_balance
 הבקשה נשלחת עם ה-JWT של המשתמש. Postgres **מוסיף את תנאי ה-policy לכל שאילתה**.
 
 ```
-משתמש א' מבקש:      select * from bets
-Postgres מריץ בפועל: select * from bets where auth.uid() = user_id
+משתמש א' מבקש:      select * from predictions
+Postgres מריץ בפועל: select * from predictions where auth.uid() = user_id
 תוצאה:              רק הניחושים של א'
 ```
 
-**אין דרך לעקוף.** גם `select * from bets` ידני יחזיר רק את השורות המותרות. זו הגנה
+**אין דרך לעקוף.** גם `select * from predictions` ידני יחזיר רק את השורות המותרות. זו הגנה
 ב**שכבת הנתונים**, לא באפליקציה.
 
 ### 5.2 מנגנון 2 — הנתונים לא עוזבים את השרת
@@ -235,7 +264,12 @@ Server Components מרנדרים בשרת ושולחים **HTML**. אין endpoi
 
 עובד סקרן (איום #1) לא אמור לראות ניחושים של עמיתים לפני שהמשחק ננעל.
 במוצר הנוכחי **אין בכלל מסך שמציג ניחושים של אחרים** — הפיצ'ר הוצא מההיקף במכוון.
-`bets_select_own` מבטיח שגם ניסיון ישיר לא יחזיר דבר.
+`predictions_select_own` מבטיח שגם ניסיון ישיר לא יחזיר דבר.
+
+### 5.5 מה כן נחשף — ובכוונה
+
+טבלת הדירוג חושפת לחברי הליגה את **הניקוד** של שאר החברים. זו חשיפה מכוונת ומהותית
+למוצר — בלעדיה אין תחרות. מה שלא נחשף: **על מה** הם ניחשו, ומתי.
 
 ---
 
@@ -252,8 +286,8 @@ Server Components מרנדרים בשרת ושולחים **HTML**. אין endpoi
 ### 6.2 בשרת, לא בלקוח
 
 ```ts
-export async function placeBet(input: unknown) {
-  const parsed = placeBetSchema.safeParse(input);        // ← בשרת
+export async function makePrediction(input: unknown) {
+  const parsed = makePredictionSchema.safeParse(input);  // ← בשרת
   if (!parsed.success) return { ok: false, error: 'קלט לא תקין' };
   // ...
 }
@@ -326,7 +360,7 @@ export async function POST(req: Request) {
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | ציבורי | ✅ |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ציבורי — **כפוף ל-RLS** | ✅ |
-| `SUPABASE_SERVICE_ROLE_KEY` | 🔴 **סוד — עוקף RLS** | ❌ |
+| `SUPABASE_SERVICE_ROLE_KEY` | 🔴 **סוד — עוקף RLS וטריגרים** | ❌ |
 | `FOOTBALL_API_KEY` | 🔴 סוד | ❌ |
 | `CRON_SECRET` | 🔴 סוד | ❌ |
 
@@ -387,7 +421,7 @@ export async function POST(req: Request) {
 | איום (§1) | ההגנה |
 |---|---|
 | עובד סקרן | RLS + הפיצ'ר לא קיים במוצר |
-| עובד תחרותי | טריגר על היתרה · אין policy ל-UPDATE על ניחושים · ספר תנועות |
+| עובד תחרותי | טריגר על עמודות הניקוד · אין policy ל-UPDATE על ניחושים · ביטול רק דרך פונקציה מבוקרת · **הדירוג מחושב מהנתונים ולא מעמודה** |
 | DevTools | כל ולידציה חוזרת בשרת · הנתונים לא עוזבים אותו |
 | גורם חיצוני | JWT ב-cookie httpOnly · RLS · סודות בשרת |
 | סורק אוטומטי | שאילתות פרמטריות · escaping של React · CSRF מובנה |
