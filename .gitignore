@@ -1,0 +1,61 @@
+# ---------------------------------------------------------------
+# Internal working documents — NOT part of the submission
+# Course brief, work plan and scoping decisions stay local only.
+# ---------------------------------------------------------------
+ASSIGNMENT.md
+ASSIGNMENT.he.md
+תוכנית-עבודה.md
+החלטות-פיצרים.md
+*.docx
+*.doc
+
+# ---------------------------------------------------------------
+# Secrets — never commit
+# ---------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.p8
+*.key
+*service-account*.json
+*firebase-adminsdk*.json
+
+# ---------------------------------------------------------------
+# Node / Next.js
+# ---------------------------------------------------------------
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# ---------------------------------------------------------------
+# Testing
+# ---------------------------------------------------------------
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# ---------------------------------------------------------------
+# Supabase
+# ---------------------------------------------------------------
+.branches/
+.temp/
+supabase/.temp/
+
+# ---------------------------------------------------------------
+# Tooling / editor / OS
+# ---------------------------------------------------------------
+.vercel
+.DS_Store
+*.log
+npm-debug.log*
+yarn-error.log*
+.idea/
+.vscode/*
+!.vscode/extensions.json
