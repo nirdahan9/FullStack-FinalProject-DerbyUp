@@ -11,7 +11,8 @@
     "verify:rls": "node scripts/verify-rls.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "seed": "node scripts/seed-competitions.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
