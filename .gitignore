@@ -9,6 +9,9 @@ ASSIGNMENT.he.md
 *.docx
 *.doc
 
+# Submission documents — handed in separately, not through this repo
+docs/
+
 # ---------------------------------------------------------------
 # Secrets — never commit
 # ---------------------------------------------------------------
