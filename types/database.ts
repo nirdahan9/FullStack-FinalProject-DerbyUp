@@ -500,6 +500,18 @@ export type Database = {
     }
     Functions: {
       cancel_prediction: { Args: { p_id: string }; Returns: undefined }
+      create_league: {
+        Args: {
+          p_competition_id: number
+          p_description?: string
+          p_name: string
+        }
+        Returns: {
+          league_code: string
+          league_id: string
+        }[]
+      }
+      generate_invite_code: { Args: never; Returns: string }
       get_global_leaderboard: {
         Args: { p_limit: number; p_offset: number }
         Returns: {
@@ -509,6 +521,18 @@ export type Database = {
         }[]
       }
       is_league_member: { Args: { p_league_id: string }; Returns: boolean }
+      join_league: { Args: { p_invite_code: string }; Returns: string }
+      league_standings: {
+        Args: { p_league_id: string; p_limit?: number; p_offset?: number }
+        Returns: {
+          avatar_url: string
+          correct_count: number
+          display_name: string
+          joined_at: string
+          points: number
+          user_id: string
+        }[]
+      }
       shares_league_with: { Args: { p_user_id: string }; Returns: boolean }
     }
     Enums: {
