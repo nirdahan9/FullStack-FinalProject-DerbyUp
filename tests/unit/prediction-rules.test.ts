@@ -57,6 +57,15 @@ describe("validatePrediction", () => {
     });
   });
 
+  it("allows predicting again once the previous one was cancelled", () => {
+    // A cancelled prediction is not an existing one. The caller decides this
+    // by excluding cancelled rows from its lookup — and the database backs it
+    // with a partial unique index that ignores them, because a plain unique
+    // constraint counted the cancelled row and left the user unable to
+    // predict at all after using the cancel button.
+    expect(validatePrediction(ctx({ hasExisting: false }))).toEqual({ ok: true });
+  });
+
   it.each<GameStatus>(["finished", "cancelled", "live", "postponed"])(
     "rejects a %s fixture",
     (status) => {

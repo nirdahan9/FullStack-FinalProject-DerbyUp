@@ -182,12 +182,13 @@ export type Database = {
         Row: {
           competition_id: number
           created_at: string
-          creator_id: string
+          creator_id: string | null
           description: string | null
           featured_bonus_pct: number
           featured_game_id: string | null
           id: string
           invite_code: string
+          is_public: boolean
           name: string
           prize_note: string | null
           prizes: Json | null
@@ -196,12 +197,13 @@ export type Database = {
         Insert: {
           competition_id: number
           created_at?: string
-          creator_id: string
+          creator_id?: string | null
           description?: string | null
           featured_bonus_pct?: number
           featured_game_id?: string | null
           id?: string
           invite_code: string
+          is_public?: boolean
           name: string
           prize_note?: string | null
           prizes?: Json | null
@@ -210,12 +212,13 @@ export type Database = {
         Update: {
           competition_id?: number
           created_at?: string
-          creator_id?: string
+          creator_id?: string | null
           description?: string | null
           featured_bonus_pct?: number
           featured_game_id?: string | null
           id?: string
           invite_code?: string
+          is_public?: boolean
           name?: string
           prize_note?: string | null
           prizes?: Json | null

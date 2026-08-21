@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { TopBar } from "@/components/layout/top-bar";
 import { BottomTabBar } from "@/components/layout/bottom-tab-bar";
+import { Toaster } from "@/components/ui/sonner";
 
 /**
  * Shell for every signed-in route.
@@ -44,6 +45,9 @@ export default async function AppLayout({
       </main>
 
       <BottomTabBar />
+      {/* Feedback for actions that do not navigate — placing a prediction,
+          cancelling one. Positioned above the tab bar. */}
+      <Toaster position="top-center" richColors />
     </div>
   );
 }

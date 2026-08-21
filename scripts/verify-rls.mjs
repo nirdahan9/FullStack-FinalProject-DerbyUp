@@ -72,13 +72,17 @@ const { error: nameErr } = await A.from('profiles')
 ok('א׳ כן יכול לשנות את השם שלו', !nameErr, `(${nameErr?.message ?? ''})`);
 
 console.log('\n── ליגות ──');
-// competitions are seeded in a later stage; one row is enough to satisfy the FK
-await admin.from('competitions').upsert({ id: 39, name: 'Premier League', country: 'England', season: 2026 });
+// Reuse whatever competition is already seeded rather than writing one. An
+// earlier version upserted id 39 with an English name to satisfy the FK, and
+// its cleanup delete then failed silently against games referencing it —
+// leaving the real competition renamed in production.
+const { data: anyComp } = await admin.from('competitions').select('id').limit(1).single();
+const COMPETITION_ID = anyComp.id;
 // created via admin: an authenticated insert cannot use RETURNING here, since
 // the SELECT policy needs a membership that does not exist yet. See the RLS
 // migration — real creation goes through a SECURITY DEFINER create_league().
 const { data: leagueRows, error: lErr } = await admin.from('leagues').insert({
-  name: 'ליגת בדיקה', creator_id: users[0].id, competition_id: 39, invite_code: 'RLSTEST1',
+  name: 'ליגת בדיקה', creator_id: users[0].id, competition_id: COMPETITION_ID, invite_code: 'RLSTEST1',
 }).select();
 ok('ליגה נוצרה (דרך admin — ראה הערה)', !lErr && leagueRows?.length === 1, `(${lErr?.message ?? ''})`);
 const leagueId = leagueRows?.[0]?.id;
@@ -121,7 +125,6 @@ ok('אורח לא רואה פרופילים', !anonProfiles || anonProfiles.leng
 
 console.log('\n── ניקוי ──');
 if (leagueId) await admin.from('leagues').delete().eq('id', leagueId);
-await admin.from('competitions').delete().eq('id', 39);
 for (const id of created) await admin.auth.admin.deleteUser(id);
 const { data: leftover } = await admin.from('profiles').select('id').in('id', created);
 ok('מחיקת משתמש מוחקת את הפרופיל (cascade)', leftover?.length === 0, `(נשארו ${leftover?.length})`);

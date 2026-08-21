@@ -3,10 +3,17 @@ import { fetchFixtures, fetchOdds } from "@/lib/football-api/client";
 import { buildQuestions } from "@/lib/football-api/mapping";
 import { COMPETITIONS } from "@/lib/football-api/types";
 
-/** How far ahead fixtures are pulled. */
-const WINDOW_DAYS = 7;
-
-const isoDate = (d: Date) => d.toISOString().slice(0, 10);
+/**
+ * How far ahead odds are fetched, and therefore how far ahead a fixture can
+ * be predicted.
+ *
+ * Fixtures themselves are pulled for the whole season, so a league shows its
+ * full calendar. Odds are a different matter: bookmakers do not price a match
+ * three months out, so asking for them would spend requests on empty
+ * responses — and a prediction made against invented default odds would
+ * freeze a number that was never a real price.
+ */
+const ODDS_WINDOW_DAYS = 14;
 
 export type SyncReport = {
   competitions: number;
@@ -19,8 +26,8 @@ export type SyncReport = {
 };
 
 /**
- * Pulls the next week of fixtures for every competition, prices them, and
- * writes the three questions per match.
+ * Pulls the full season for every competition, prices the fixtures inside the
+ * odds window, and writes the three questions for each of those.
  *
  * Runs once a day rather than per request. Users never trigger an upstream
  * call, so the cost is fixed no matter how many people are playing — roughly
@@ -44,13 +51,13 @@ export async function syncFixtures(now = new Date()): Promise<SyncReport> {
     errors: [],
   };
 
-  const from = isoDate(now);
-  const to = isoDate(new Date(now.getTime() + WINDOW_DAYS * 86_400_000));
   const season = now.getUTCFullYear();
+  const oddsUntil = new Date(now.getTime() + ODDS_WINDOW_DAYS * 86_400_000);
 
   for (const competition of COMPETITIONS) {
     try {
-      const fixtures = await fetchFixtures(competition.id, season, from, to);
+      // Whole season, one request.
+      const fixtures = await fetchFixtures(competition.id, season);
       report.apiCalls += 1;
       report.competitions += 1;
       if (!fixtures.length) continue;
@@ -81,9 +88,13 @@ export async function syncFixtures(now = new Date()): Promise<SyncReport> {
       }
       report.fixtures += games?.length ?? 0;
 
-      // Odds are queried per date, so only the dates that actually have
-      // fixtures are requested.
-      const dates = [...new Set(fixtures.map((f) => f.kickoffAt.slice(0, 10)))];
+      // Odds are queried per date, so only dates that actually have fixtures
+      // inside the pricing window are requested.
+      const pricedFixtures = fixtures.filter((f) => {
+        const kickoff = new Date(f.kickoffAt);
+        return kickoff >= now && kickoff <= oddsUntil;
+      });
+      const dates = [...new Set(pricedFixtures.map((f) => f.kickoffAt.slice(0, 10)))];
       const oddsByFixture = new Map<number, Awaited<ReturnType<typeof fetchOdds>> extends Map<number, infer V> ? V : never>();
 
       for (const date of dates) {
@@ -93,7 +104,14 @@ export async function syncFixtures(now = new Date()): Promise<SyncReport> {
         for (const [id, value] of priced) oddsByFixture.set(id, value);
       }
 
+      const pricedIds = new Set(pricedFixtures.map((f) => f.fixtureId));
+
       const rows = (games ?? []).flatMap((game) => {
+        // A fixture outside the window gets no questions yet. It still shows
+        // in the league calendar, marked as not open — which is honest, and
+        // avoids locking anybody into a made-up price.
+        if (!pricedIds.has(game.fixture_id)) return [];
+
         const priced = oddsByFixture.get(game.fixture_id);
         if (!priced?.complete) report.defaultsUsed += 1;
 

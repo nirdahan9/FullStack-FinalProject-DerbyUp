@@ -1,16 +1,30 @@
+import { Crown } from "lucide-react";
 import { rankRows, type ScoreRow } from "@/lib/domain/standings";
 
 /**
- * Renders a ranked table. Used by both boards — the league table and the
- * site-wide leaderboard differ in what is counted, not in how it is shown.
+ * Ranked table, styled as the DerbyUp app styles it: a card-kickoff row per
+ * member, medal for the top three and #N below that, avatar, name, score.
+ * Your own row is outlined.
+ *
+ * Used by both boards — the league table and the site-wide leaderboard differ
+ * in what gets counted, not in how it is drawn.
  */
+function RankBadge({ rank }: { rank: number }) {
+  if (rank === 1) return <span className="text-lg">🥇</span>;
+  if (rank === 2) return <span className="text-lg">🥈</span>;
+  if (rank === 3) return <span className="text-lg">🥉</span>;
+  return <span className="text-sm font-bold text-muted-foreground">#{rank}</span>;
+}
+
 export function LeaderboardTable({
   rows,
   currentUserId,
+  creatorId,
   emptyLabel = "אין עדיין נקודות",
 }: {
   rows: ScoreRow[];
   currentUserId?: string;
+  creatorId?: string | null;
   emptyLabel?: string;
 }) {
   if (!rows.length) {
@@ -21,41 +35,57 @@ export function LeaderboardTable({
     );
   }
 
-  const ranked = rankRows(rows);
-
   return (
     <div className="flex flex-col gap-2">
-      {ranked.map((row) => {
+      {rankRows(rows).map((row) => {
         const isMe = row.userId === currentUserId;
 
         return (
           <div
             key={row.userId}
             className={`card-kickoff flex items-center gap-3 py-3 ${
-              isMe ? "ring-2 ring-primary/40" : ""
+              isMe ? "border border-primary/30 bg-primary/5" : ""
             }`}
           >
-            <span
-              className={`w-7 shrink-0 text-center text-sm font-black ${
-                row.rank <= 3 ? "text-primary" : "text-muted-foreground"
-              }`}
-            >
-              {row.rank}
-            </span>
-
-            <span className="min-w-0 flex-1 truncate font-bold" dir="auto">
-              {row.displayName}
-              {isMe && <span className="ms-2 text-xs text-muted-foreground">(אתה)</span>}
-            </span>
-
-            <div className="flex shrink-0 flex-col items-end">
-              <span className="font-black text-primary">
-                {row.points.toLocaleString("he-IL", { maximumFractionDigits: 2 })}
-              </span>
-              <span className="text-[11px] text-muted-foreground">
-                {row.correctCount} פגיעות
-              </span>
+            <div className="w-7 shrink-0 text-center">
+              <RankBadge rank={row.rank} />
             </div>
+
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-sm">
+              {row.avatarUrl ? (
+                // Avatars can come from any host a user pastes in; see top-bar.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={row.avatarUrl}
+                  alt=""
+                  referrerPolicy="no-referrer"
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+              ) : (
+                "👤"
+              )}
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="flex items-center gap-1 truncate text-sm font-bold" dir="auto">
+                <span className="truncate">{row.displayName}</span>
+                {creatorId === row.userId && (
+                  <Crown size={11} className="shrink-0 text-amber-500" />
+                )}
+                {isMe && <span className="text-[10px] font-normal text-primary">(אתה)</span>}
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                {row.correctCount} פגיעות
+              </p>
+            </div>
+
+            <span className="shrink-0 text-sm font-black text-primary">
+              {row.points.toLocaleString("he-IL", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{" "}
+              נק׳
+            </span>
           </div>
         );
       })}

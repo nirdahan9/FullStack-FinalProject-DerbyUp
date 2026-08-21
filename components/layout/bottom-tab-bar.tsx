@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gamepad2, Home, Trophy } from "lucide-react";
+import { CalendarDays, Gamepad2, Home, Trophy } from "lucide-react";
 
 const TABS = [
   { href: "/dashboard", icon: Home, label: "בית" },
+  { href: "/games", icon: CalendarDays, label: "משחקים" },
   { href: "/leagues", icon: Trophy, label: "ליגות" },
   { href: "/challenge", icon: Gamepad2, label: "אתגרים" },
 ] as const;

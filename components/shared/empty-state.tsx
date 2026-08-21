@@ -8,11 +8,13 @@ export function EmptyState({
   title,
   body,
   action,
+  secondaryAction,
 }: {
   icon: LucideIcon;
   title: string;
   body: string;
   action?: { href: string; label: string };
+  secondaryAction?: { href: string; label: string };
 }) {
   return (
     <div className="card-kickoff flex flex-col items-center gap-3 py-10 text-center">
@@ -23,10 +25,19 @@ export function EmptyState({
         <h2 className="font-bold text-foreground">{title}</h2>
         <p className="max-w-xs text-sm text-muted-foreground">{body}</p>
       </div>
-      {action && (
-        <Button asChild className="mt-1 font-bold">
-          <Link href={action.href}>{action.label}</Link>
-        </Button>
+      {(action || secondaryAction) && (
+        <div className="mt-1 flex flex-wrap justify-center gap-2">
+          {action && (
+            <Button asChild className="font-bold">
+              <Link href={action.href}>{action.label}</Link>
+            </Button>
+          )}
+          {secondaryAction && (
+            <Button asChild variant="outline" className="font-bold">
+              <Link href={secondaryAction.href}>{secondaryAction.label}</Link>
+            </Button>
+          )}
+        </div>
       )}
     </div>
   );

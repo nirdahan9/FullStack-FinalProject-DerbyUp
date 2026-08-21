@@ -60,18 +60,20 @@ type ApiFixture = {
   goals: { home: number | null; away: number | null };
 };
 
-/** Fixtures for one competition between two dates (inclusive, YYYY-MM-DD). */
+/**
+ * Fixtures for one competition. Without a date range this returns the whole
+ * season in a single request — 380 matches for a league like the Premier
+ * League — which is what lets a league page show its full calendar.
+ */
 export async function fetchFixtures(
   leagueId: number,
   season: number,
-  from: string,
-  to: string,
+  range?: { from: string; to: string },
 ): Promise<FixtureDto[]> {
   const raw = await apiGet<ApiFixture>("/fixtures", {
     league: leagueId,
     season,
-    from,
-    to,
+    ...(range ? { from: range.from, to: range.to } : {}),
   });
 
   return raw.map((f) => ({

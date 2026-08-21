@@ -1,6 +1,7 @@
 export type ScoreRow = {
   userId: string;
   displayName: string;
+  avatarUrl?: string | null;
   points: number;
   correctCount: number;
   /** Tie-break of last resort: whoever has been around longer ranks higher. */
