@@ -25,11 +25,19 @@ export default async function AppLayout({
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("display_name, username, avatar_url, total_points")
-    .eq("id", user.id)
-    .single();
+  const [{ data: profile }, { count: unreadCount }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("display_name, username, avatar_url, total_points")
+      .eq("id", user.id)
+      .single(),
+    // head:true so this is a count, not a payload we throw away.
+    supabase
+      .from("notifications")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .is("read_at", null),
+  ]);
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
@@ -37,6 +45,7 @@ export default async function AppLayout({
         displayName={profile?.display_name ?? profile?.username ?? "?"}
         totalPoints={Number(profile?.total_points ?? 0)}
         avatarUrl={profile?.avatar_url ?? null}
+        unreadCount={unreadCount ?? 0}
       />
 
       {/* pb-safe clears the fixed tab bar plus the iOS home indicator. */}

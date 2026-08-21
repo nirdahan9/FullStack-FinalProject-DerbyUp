@@ -13,10 +13,12 @@ export function TopBar({
   displayName,
   totalPoints,
   avatarUrl,
+  unreadCount,
 }: {
   displayName: string;
   totalPoints: number;
   avatarUrl: string | null;
+  unreadCount: number;
 }) {
   const initial = (displayName.trim()[0] ?? "?").toUpperCase();
 
@@ -42,10 +44,15 @@ export function TopBar({
 
           <Link
             href="/notifications"
-            aria-label="התראות"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary transition-colors hover:bg-secondary/80 md:h-9 md:w-9"
+            aria-label={unreadCount ? `התראות — ${unreadCount} חדשות` : "התראות"}
+            className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary transition-colors hover:bg-secondary/80 md:h-9 md:w-9"
           >
             <Bell size={15} className="text-foreground" />
+            {unreadCount > 0 && (
+              <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-black text-primary-foreground">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </Link>
 
           <div className="flex shrink-0 items-center gap-1 rounded-full bg-secondary px-2 py-1 md:px-3 md:py-1.5">
