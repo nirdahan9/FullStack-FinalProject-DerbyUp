@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design tokens copied from the DerbyUp app (bet-joy-league-hub/src/index.css).
+   The Heebo font is loaded through next/font in app/layout.tsx instead of an
+   @import, so it is self-hosted and does not block the first paint. */
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+
+    --primary: 122 39% 49%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 10%;
+
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+
+    --accent: 122 39% 49%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 122 39% 49%;
+
+    --radius: 24px;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 122 39% 49%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 240 6% 90%;
+    --sidebar-ring: 122 39% 49%;
+
+    --shadow-soft: 0 4px 12px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03);
+    --shadow-elevated: 0 8px 24px -4px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+    --bezier: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .dark {
+    --background: 240 10% 10%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 14%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 14%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 122 39% 49%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 20%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 5% 20%;
+    --muted-foreground: 240 4% 60%;
+    --accent: 122 39% 49%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5% 20%;
+    --input: 240 5% 20%;
+    --ring: 122 39% 49%;
+
+    --sidebar-background: 240 10% 14%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-accent: 240 5% 20%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 5% 20%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  /* No `direction: inherit` here — unlike the Vite app, the direction is set by
+     dir="rtl" on <html>, and an author-level `inherit` would resolve to ltr and
+     silently override it. */
+  html {
+    @apply bg-background text-foreground;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    overflow-x: hidden;
+    max-width: 100vw;
+    touch-action: pan-y;
+  }
+
+  /* מניעת zoom ב-input focus ב-iOS — !important beats Tailwind text-sm */
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em) !important;
+  }
+
+  /* iOS adds a ~300ms delay before firing click events on any tappable element
+     (it waits to see if a double-tap-to-zoom is coming). On touch devices that
+     delay manifests as "I tapped but nothing happened" — especially on small
+     hit targets like back buttons. `touch-action: manipulation` opts out of
+     the double-tap-zoom gesture and makes clicks fire immediately. */
+  button,
+  a,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+}
+
+@layer utilities {
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+  .card-kickoff {
+    @apply bg-card rounded-[24px] p-5 shadow-soft;
+  }
+  .section-label {
+    @apply text-xs font-bold tracking-[0.08em] uppercase text-muted-foreground;
+  }
+
+  /* iOS Safe Area */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pb-safe {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+  }
+}

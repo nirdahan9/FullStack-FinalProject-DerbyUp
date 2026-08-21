@@ -1,16 +1,13 @@
 # ---------------------------------------------------------------
-# Internal working documents — NOT part of the submission
-# Course brief, work plan and scoping decisions stay local only.
+# docs/ — everything written rather than built:
+#   docs/*.md            submission documents, handed in separately
+#   docs/assignment/     the course brief
+#   docs/planning/       work plan and scoping decisions, internal only
+# None of it belongs in the repository the lecturer sees.
 # ---------------------------------------------------------------
-ASSIGNMENT.md
-ASSIGNMENT.he.md
-תוכנית-עבודה.md
-החלטות-פיצרים.md
+docs/
 *.docx
 *.doc
-
-# Submission documents — handed in separately, not through this repo
-docs/
 
 # ---------------------------------------------------------------
 # Secrets — never commit
@@ -62,3 +59,5 @@ yarn-error.log*
 .idea/
 .vscode/*
 !.vscode/extensions.json
+# (Vercel CLI appends `.env*` here; the Secrets block above already
+#  covers it and keeps the !.env.example negation effective.)
