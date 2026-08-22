@@ -150,8 +150,10 @@ create table public.user_achievements (
 
 -- ─── 10. daily_puzzles ─────────────────────────────────────────────────────
 -- Football Bridge: two clubs, name a player who appeared for both.
--- valid_answers holds normalised names, built offline from the Transfermarkt
--- dataset so publishing a puzzle needs no external call.
+-- valid_answers holds display names, built offline from the Transfermarkt
+-- dataset so publishing a puzzle needs no external call. Matching normalises
+-- both sides, so storing them readable lets the same list be revealed to the
+-- player when the challenge ends.
 create table public.daily_puzzles (
   id            uuid primary key default gen_random_uuid(),
   play_date     date unique not null,

@@ -12,7 +12,14 @@ const heebo = Heebo({
   display: "swap",
 });
 
+// Absolute base for the og:image URL. Vercel injects the production domain at
+// build time; locally there is nothing to inject, so fall back to the dev server.
+const siteUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  : "http://localhost:3000";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "DerbyUp — ניחושי כדורגל לארגונים",
   description:
     "פלטפורמת ניחושי כדורגל לארגונים. פותחים ליגה, מזמינים את העובדים, ומנחשים תוצאות של משחקים אמיתיים.",
