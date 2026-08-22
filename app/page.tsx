@@ -1,4 +1,5 @@
-import { getUpcomingGames } from "@/lib/landing/upcoming-games";
+import { getLandingFixtures } from "@/lib/landing/fixtures";
+import { LiveRefresher } from "@/components/shared/live-refresher";
 import { Faq } from "@/components/landing/faq";
 import { FeatureGrid } from "@/components/landing/feature-grid";
 import { FinalCta } from "@/components/landing/final-cta";
@@ -22,7 +23,8 @@ import { ScoringModel } from "@/components/landing/scoring-model";
  * lib/landing/upcoming-games.ts.
  */
 export default async function Home() {
-  const games = await getUpcomingGames();
+  const games = await getLandingFixtures();
+  const hasLiveGame = games.some((game) => game.status === "live");
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
@@ -38,6 +40,10 @@ export default async function Home() {
       </main>
 
       <LandingFooter />
+
+      {/* Only while something is actually being played. On every other visit
+          this page mounts nothing and polls nothing. */}
+      {hasLiveGame && <LiveRefresher />}
     </div>
   );
 }

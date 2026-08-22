@@ -1,7 +1,8 @@
 import { Lock } from "lucide-react";
 import { translateTeam } from "@/lib/i18n/teams";
 import { FixtureLabel } from "@/components/shared/fixture";
-import type { LandingGame } from "@/lib/landing/upcoming-games";
+import { LiveScore } from "@/components/games/live-score";
+import type { LandingGame } from "@/lib/landing/fixtures";
 
 /**
  * The hero's proof. Everything else on this page is a claim about how DerbyUp
@@ -31,6 +32,10 @@ const EXAMPLE: LandingGame = {
     { key: "away", label: "Barcelona", odds: 4.2 },
   ],
   provisional: false,
+  status: "scheduled",
+  scoreHome: null,
+  scoreAway: null,
+  minute: null,
 };
 
 function kickoffLabel(iso: string): string {
@@ -61,12 +66,14 @@ export function FixturePreview({ games }: { games: LandingGame[] }) {
   const isExample = games.length === 0;
   const [featured, ...rest] = isExample ? [EXAMPLE] : games;
   const best = Math.max(...featured.outcomes.map((o) => o.odds));
+  // The function orders live fixtures first, so this is the card at the top.
+  const isLive = featured.status === "live";
 
   return (
     <div className="card-kickoff flex flex-col gap-4 shadow-elevated ring-1 ring-border/60">
       <div className="flex items-center justify-between gap-2">
         <span className="section-label">
-          {isExample ? "כך זה נראה" : "המשחקים הקרובים"}
+          {isExample ? "כך זה נראה" : isLive ? "עכשיו במגרש" : "המשחקים הקרובים"}
         </span>
         <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary">
           {isExample ? "משחק לדוגמה" : "יחסים אמיתיים"}
@@ -78,7 +85,17 @@ export function FixturePreview({ games }: { games: LandingGame[] }) {
           <span className="truncate font-bold" dir="auto">
             {featured.competitionName}
           </span>
-          {featured.kickoffAt && <span>{kickoffLabel(featured.kickoffAt)}</span>}
+          {/* The score takes the slot the kick-off time had: once a match is
+              under way, when it started is no longer the useful fact. */}
+          {isLive ? (
+            <LiveScore
+              scoreHome={featured.scoreHome}
+              scoreAway={featured.scoreAway}
+              minute={featured.minute}
+            />
+          ) : (
+            featured.kickoffAt && <span>{kickoffLabel(featured.kickoffAt)}</span>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -95,7 +112,9 @@ export function FixturePreview({ games }: { games: LandingGame[] }) {
           ))}
         </div>
 
-        <p className="text-xs font-bold text-muted-foreground">מי ינצח?</p>
+        <p className="text-xs font-bold text-muted-foreground">
+          {isLive ? "היחסים שננעלו לפני המשחק" : "מי ינצח?"}
+        </p>
 
         <div className="grid grid-cols-3 gap-2">
           {featured.outcomes.map((outcome) => (
@@ -149,9 +168,17 @@ export function FixturePreview({ games }: { games: LandingGame[] }) {
                 away={game.awayTeam}
                 className="min-w-0 flex-1 truncate font-bold"
               />
-              <span className="shrink-0 text-muted-foreground">
-                {kickoffLabel(game.kickoffAt)}
-              </span>
+              {game.status === "live" ? (
+                <LiveScore
+                  scoreHome={game.scoreHome}
+                  scoreAway={game.scoreAway}
+                  minute={game.minute}
+                />
+              ) : (
+                <span className="shrink-0 text-muted-foreground">
+                  {kickoffLabel(game.kickoffAt)}
+                </span>
+              )}
             </div>
           ))}
         </div>

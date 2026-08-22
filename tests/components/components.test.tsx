@@ -480,6 +480,10 @@ describe("§8.1 קומפוננטות", () => {
       competitionName: "פרמייר ליג",
       outcomes: OUTCOMES,
       provisional: false,
+      status: "scheduled",
+      scoreHome: null,
+      scoreAway: null,
+      minute: null,
     };
 
     it("22. בלי משחקים במסד — מוצג משחק לדוגמה, ולא כרטיס ריק", () => {
@@ -505,6 +509,23 @@ describe("§8.1 קומפוננטות", () => {
 
       // And the headline number is the biggest of them, not the first.
       expect(screen.getByText("3.6 נקודות")).toBeInTheDocument();
+    });
+
+    it("24א. משחק חי — התוצאה תופסת את מקום שעת הפתיחה", () => {
+      render(
+        <FixturePreview
+          games={[{ ...game, status: "live", scoreHome: 2, scoreAway: 1, minute: 63 }]}
+        />,
+      );
+
+      expect(screen.getByText("עכשיו במגרש")).toBeInTheDocument();
+      expect(renderedText()).toContain("2-1");
+      expect(screen.getByText("63'")).toBeInTheDocument();
+      expect(screen.getByText("משחק חי")).toBeInTheDocument();
+
+      // Predictions closed at kick-off, so the prices are stated as history
+      // rather than as an invitation.
+      expect(screen.queryByText("מי ינצח?")).not.toBeInTheDocument();
     });
 
     it("24. יחס זמני נאמר כהערכה, ולא מוגש כמחיר סופי", () => {

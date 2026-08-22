@@ -3,7 +3,7 @@ import { Ban, Rocket, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FixturePreview } from "@/components/landing/fixture-preview";
 import { THEME_COLORS } from "@/lib/theme-colors";
-import type { LandingGame } from "@/lib/landing/upcoming-games";
+import type { LandingGame } from "@/lib/landing/fixtures";
 
 /**
  * The gate. A visitor arriving here knows nothing, so the fold has to answer

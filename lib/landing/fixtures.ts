@@ -11,12 +11,19 @@ export type LandingGame = {
   outcomes: Outcome[];
   /** The price is a placeholder; the card labels it as an estimate. */
   provisional: boolean;
+  /** 'scheduled' or 'live' — the only two the function returns. */
+  status: string;
+  scoreHome: number | null;
+  scoreAway: number | null;
+  /** Elapsed minutes, while the match is being played. */
+  minute: number | null;
 };
 
 /**
- * The three fixtures the landing page shows an anonymous visitor.
+ * The three fixtures the landing page shows an anonymous visitor — a match in
+ * progress first, when there is one.
  *
- * Read through `landing_upcoming_games()` rather than the tables: the RLS
+ * Read through `landing_fixtures()` rather than the tables: the RLS
  * policies on `games`, `competitions` and `questions` admit `authenticated`
  * only, and the function is the narrow opening that lets `anon` see this one
  * shape without widening any of them. See the migration for why.
@@ -26,10 +33,10 @@ export type LandingGame = {
  * database does not answer — before the seed has run, on a fresh clone, or
  * during an outage. The caller draws an illustrative fixture instead.
  */
-export async function getUpcomingGames(): Promise<LandingGame[]> {
+export async function getLandingFixtures(): Promise<LandingGame[]> {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase.rpc("landing_upcoming_games");
+    const { data, error } = await supabase.rpc("landing_fixtures");
 
     if (error || !data) return [];
 
@@ -42,6 +49,10 @@ export async function getUpcomingGames(): Promise<LandingGame[]> {
       competitionName: row.competition_name,
       outcomes: (row.outcomes as Outcome[]) ?? [],
       provisional: row.odds_provisional,
+      status: row.status,
+      scoreHome: row.score_home,
+      scoreAway: row.score_away,
+      minute: row.minute,
     }));
   } catch {
     return [];

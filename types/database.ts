@@ -705,7 +705,7 @@ export type Database = {
       is_league_member: { Args: { p_league_id: string }; Returns: boolean }
       is_site_admin: { Args: never; Returns: boolean }
       join_league: { Args: { p_invite_code: string }; Returns: string }
-      landing_upcoming_games: {
+      landing_fixtures: {
         Args: never
         Returns: {
           away_logo: string | null
@@ -714,8 +714,12 @@ export type Database = {
           home_logo: string | null
           home_team: string
           kickoff_at: string
+          minute: number | null
           odds_provisional: boolean
           outcomes: Json
+          score_away: number | null
+          score_home: number | null
+          status: string
         }[]
       }
       league_live_predictions: {
