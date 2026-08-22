@@ -1,86 +1,43 @@
-import Image from "next/image";
-import Link from "next/link";
-import { Target, Trophy, Users } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { getUpcomingGames } from "@/lib/landing/upcoming-games";
+import { Faq } from "@/components/landing/faq";
+import { FeatureGrid } from "@/components/landing/feature-grid";
+import { FinalCta } from "@/components/landing/final-cta";
+import { Hero } from "@/components/landing/hero";
+import { HowItWorks } from "@/components/landing/how-it-works";
+import { LandingFooter } from "@/components/landing/landing-footer";
+import { LandingHeader } from "@/components/landing/landing-header";
+import { ScoringModel } from "@/components/landing/scoring-model";
 
 /**
- * Landing page. Still provisional — the business-value copy is written
- * properly once the product flows exist — but it now routes into auth.
+ * The landing page — the only route an anonymous visitor sees, and the one
+ * place the product has to explain itself before anyone signs up.
+ *
+ * The order is the order the questions arrive in: what is this (hero), what do
+ * I have to do (how it works), how does the scoring work (the one rule the
+ * whole thing rests on), what else is in here (features), and finally the
+ * objections nobody says out loud (FAQ — "is this gambling?" first).
+ *
+ * Rendered on the server like every other page. The only data it fetches is
+ * the fixture strip, and that call cannot fail the render: see
+ * lib/landing/upcoming-games.ts.
  */
-export default function Home() {
+export default async function Home() {
+  const games = await getUpcomingGames();
+
   return (
-    <main className="min-h-dvh bg-background px-5 py-10">
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Image
-              src="/kickoff_logo_cropped.png"
-              alt=""
-              width={28}
-              height={28}
-              className="h-6 w-auto"
-              priority
-            />
-            <span className="text-2xl font-black tracking-tight">DerbyUp</span>
-          </div>
-          <ThemeToggle />
-        </header>
+    <div className="flex min-h-dvh flex-col bg-background">
+      <LandingHeader />
 
-        <section className="card-kickoff flex flex-col gap-4 animate-fade-in-up">
-          <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <Trophy className="h-5 w-5" />
-            </span>
-            <div>
-              <h2 className="text-lg font-bold text-foreground">ניחושי כדורגל לארגונים</h2>
-              <p className="text-sm text-muted-foreground">
-                פותחים ליגה, מזמינים את העובדים, ומנחשים תוצאות אמיתיות
-              </p>
-            </div>
-          </div>
+      <main className="flex-1">
+        <Hero games={games} />
+        <HowItWorks />
+        <ScoringModel />
+        <FeatureGrid />
+        <Faq />
+        <FinalCta />
+      </main>
 
-          <p className="text-sm leading-relaxed text-foreground">
-            מנחשים מי ינצח. צדקת — מקבל את היחס כנקודות. ניחוש נכון ביחס{" "}
-            <span className="font-bold text-primary">7.15</span> שווה{" "}
-            <span className="font-bold text-primary">7.15 נקודות</span>. אין הימור, אין
-            יתרה, אין הפסד.
-          </p>
-
-          <div className="flex flex-wrap gap-2">
-            <Badge>ליגות ארגוניות</Badge>
-            <Badge variant="secondary">יחסים אמיתיים</Badge>
-            <Badge variant="outline">עיבוד אוטומטי</Badge>
-          </div>
-        </section>
-
-        <section className="grid gap-4 sm:grid-cols-2">
-          <div className="card-kickoff flex items-start gap-3">
-            <Target className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-            <div>
-              <h3 className="font-bold text-foreground">דירוג הליגה</h3>
-              <p className="text-sm text-muted-foreground">רק ניחושי מנצח, בטורניר של הליגה</p>
-            </div>
-          </div>
-          <div className="card-kickoff flex items-start gap-3">
-            <Users className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-            <div>
-              <h3 className="font-bold text-foreground">לידרבורד האתר</h3>
-              <p className="text-sm text-muted-foreground">כל סוגי הניחוש והאתגר היומי</p>
-            </div>
-          </div>
-        </section>
-
-        <div className="flex flex-wrap gap-3">
-          <Button size="lg" className="font-bold" asChild>
-            <Link href="/signup">פתיחת חשבון</Link>
-          </Button>
-          <Button size="lg" variant="outline" className="font-bold" asChild>
-            <Link href="/login">התחברות</Link>
-          </Button>
-        </div>
-      </div>
-    </main>
+      <LandingFooter />
+    </div>
   );
 }

@@ -121,6 +121,8 @@ export type Database = {
           home_team: string
           id: string
           kickoff_at: string
+          live_updated_at: string | null
+          minute: number | null
           score_away: number | null
           score_home: number | null
           settled_at: string | null
@@ -136,6 +138,8 @@ export type Database = {
           home_team: string
           id?: string
           kickoff_at: string
+          live_updated_at?: string | null
+          minute?: number | null
           score_away?: number | null
           score_home?: number | null
           settled_at?: string | null
@@ -151,6 +155,8 @@ export type Database = {
           home_team?: string
           id?: string
           kickoff_at?: string
+          live_updated_at?: string | null
+          minute?: number | null
           score_away?: number | null
           score_home?: number | null
           settled_at?: string | null
@@ -699,6 +705,34 @@ export type Database = {
       is_league_member: { Args: { p_league_id: string }; Returns: boolean }
       is_site_admin: { Args: never; Returns: boolean }
       join_league: { Args: { p_invite_code: string }; Returns: string }
+      landing_upcoming_games: {
+        Args: never
+        Returns: {
+          away_logo: string | null
+          away_team: string
+          competition_name: string
+          home_logo: string | null
+          home_team: string
+          kickoff_at: string
+          odds_provisional: boolean
+          outcomes: Json
+        }[]
+      }
+      league_live_predictions: {
+        Args: { p_league_id: string }
+        Returns: {
+          bonus_pct: number
+          current_odds: number | null
+          exact_score: string | null
+          odds: number
+          odds_provisional: boolean
+          question_type: string
+          score_away: number
+          score_home: number
+          selected_outcome: string
+          user_id: string
+        }[]
+      }
       league_standings: {
         Args: { p_league_id: string; p_limit?: number; p_offset?: number }
         Returns: {
