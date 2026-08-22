@@ -28,7 +28,7 @@ export default async function AppLayout({
   const [{ data: profile }, { count: unreadCount }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("display_name, username, avatar_url, total_points")
+      .select("display_name, username, avatar_url, total_points, is_site_admin")
       .eq("id", user.id)
       .single(),
     // head:true so this is a count, not a payload we throw away.
@@ -46,6 +46,7 @@ export default async function AppLayout({
         totalPoints={Number(profile?.total_points ?? 0)}
         avatarUrl={profile?.avatar_url ?? null}
         unreadCount={unreadCount ?? 0}
+        isSiteAdmin={profile?.is_site_admin ?? false}
       />
 
       {/* pb-safe clears the fixed tab bar plus the iOS home indicator. */}

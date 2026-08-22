@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { E2EWorld, sessionCookie, type E2EUser } from "./fixtures";
+import { admin, E2EWorld, sessionCookie, type E2EUser } from "./fixtures";
 
 /**
  * §5.3 — route protection, and §8.3.1–2.
@@ -51,6 +51,36 @@ test.describe("§5.3 הגנת מסלולים", () => {
       });
       expect(wrong.status()).toBe(401);
     }
+  });
+
+  test("7. מחובר שאינו מנהל אתר ב-/admin — מופנה ל-/dashboard", async ({ page, context }) => {
+    await context.addCookies([sessionCookie(user, "localhost")]);
+    await page.goto("/admin");
+
+    // Sent to the app rather than shown a 403: there is nothing behind /admin
+    // for an ordinary user to be told about.
+    await expect(page).toHaveURL(/\/dashboard/);
+  });
+
+  test("8. מנהל אתר ב-/admin — הדאשבורד נטען ומנווט", async ({ page, context }) => {
+    const operator = await world.signUp("מנהל אתר");
+    // Through the service role, which is the only writer the tamper trigger
+    // lets near this column.
+    const { error } = await admin
+      .from("profiles")
+      .update({ is_site_admin: true })
+      .eq("id", operator.id);
+    expect(error).toBeNull();
+
+    await context.addCookies([sessionCookie(operator, "localhost")]);
+    await page.goto("/admin");
+    await expect(page.getByRole("heading", { name: "סקירה כללית" })).toBeVisible();
+
+    await page.getByRole("link", { name: "משתמשים" }).first().click();
+    await expect(page).toHaveURL(/\/admin\/users/);
+    await expect(page.getByRole("heading", { name: "כל המשתמשים" })).toBeVisible();
+    // The row for the operator itself proves the function returned real rows.
+    await expect(page.getByText(operator.email).first()).toBeVisible();
   });
 
   test("§8.3.2 התחברות בפרטים שגויים — הודעת שגיאה", async ({ page }) => {

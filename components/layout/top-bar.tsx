@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Bell, User } from "lucide-react";
+import { Bell, ShieldCheck, User } from "lucide-react";
 import { ThemeToggle } from "./theme-toggle";
 
 /**
@@ -8,17 +8,24 @@ import { ThemeToggle } from "./theme-toggle";
  *
  * The language switch from the original is gone — this build is Hebrew only —
  * and the points pill shows total_points, since there is no balance to spend.
+ *
+ * The shield is the only entry point to /admin, and it renders for site admins
+ * alone. Not as a security measure — the route and every function behind it
+ * check the role themselves — but because a link to a page that redirects is
+ * worse than no link.
  */
 export function TopBar({
   displayName,
   totalPoints,
   avatarUrl,
   unreadCount,
+  isSiteAdmin = false,
 }: {
   displayName: string;
   totalPoints: number;
   avatarUrl: string | null;
   unreadCount: number;
+  isSiteAdmin?: boolean;
 }) {
   const initial = (displayName.trim()[0] ?? "?").toUpperCase();
 
@@ -40,6 +47,17 @@ export function TopBar({
         </Link>
 
         <div className="flex shrink-0 items-center gap-1 md:gap-2">
+          {isSiteAdmin && (
+            <Link
+              href="/admin"
+              aria-label="ניהול האתר"
+              title="ניהול האתר"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary transition-colors hover:bg-secondary/80 md:h-9 md:w-9"
+            >
+              <ShieldCheck size={15} className="text-primary" />
+            </Link>
+          )}
+
           <ThemeToggle />
 
           <Link
