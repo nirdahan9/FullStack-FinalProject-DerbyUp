@@ -65,7 +65,7 @@ cp .env.example .env.local
 
 # 3. הקמת הסכימה בפרויקט Supabase שלכם
 npx supabase link --project-ref <project-ref>
-npx supabase db push          # מריץ את 10 המיגרציות שב-supabase/migrations/
+npx supabase db push          # מריץ את 11 המיגרציות שב-supabase/migrations/
 
 # 4. זריעת התחרויות והמשחקים
 npm run seed                  # 7 תחרויות
@@ -102,8 +102,8 @@ npm run dev                   # http://localhost:3000
 
 ```bash
 npm test                  # 190 בדיקות יחידה וקומפוננטות — לא נוגע ברשת, < שנייה
-npm run test:integration  # 124 בדיקות מול Supabase — דורש .env.local
-npm run test:e2e          # 17 בדיקות Playwright — דורש שרת מקומי
+npm run test:integration  # 131 בדיקות מול Supabase — דורש .env.local
+npm run test:e2e          # 18 בדיקות Playwright — דורש שרת מקומי
 npm run test:coverage     # דוח כיסוי → coverage/index.html
 npm run test:clean        # ניקוי שאריות מריצה שנקטעה
 ```
@@ -112,10 +112,10 @@ npm run test:clean        # ניקוי שאריות מריצה שנקטעה
 |---|---|---|
 | `unit` | 174 | לוגיקת הניקוד, היישוב, הדירוג והוולידציות — **100% כיסוי** |
 | `components` | 16 | מה שהמסך **אומר**: נקודות על אריח, מצב נעול, מי מודגש בטבלה |
-| `integration` | 124 | הרשאות ו-RLS מול DB אמיתי, ושני לוחות התוצאות |
-| `e2e` | 17 | המסע המלא בדפדפן — הרשמה → ליגה → ניחוש → יישוב → טבלה |
+| `integration` | 131 | הרשאות ו-RLS מול DB אמיתי, ושני לוחות התוצאות |
+| `e2e` | 18 | המסע המלא בדפדפן — הרשמה → ליגה → ניחוש → יישוב → טבלה |
 
-**331 בדיקות.** בדיקות האינטגרציה בונות עולם חד-פעמי משלהן ומוחקות אותו בסוף.
+**339 בדיקות.** בדיקות האינטגרציה בונות עולם חד-פעמי משלהן ומוחקות אותו בסוף.
 
 ---
 
@@ -144,7 +144,7 @@ lib/
   cron/                 סנכרון משחקים · יישוב
   football-api/         לקוח API-Football ומיפוי
   validation/           סכימות Zod
-supabase/migrations/    10 מיגרציות — 12 טבלאות · 19 policies · 11 פונקציות
+supabase/migrations/    11 מיגרציות — 12 טבלאות · 19 policies · 12 פונקציות
 tests/                  unit · components · integration · e2e
 scripts/                seed · בניית בנק האתגרים · תחזוקה
 ```
@@ -190,3 +190,15 @@ scripts/                seed · בניית בנק האתגרים · תחזוקה
 
 מסמכי ההגשה המלאים (איפיון מוצר · ארכיטקטורה · תכנון טכני · אפיון בדיקות ·
 סקייל · אבטחה) מוגשים **בנפרד** ואינם בריפו.
+
+מה שכן כאן — [`docs/planning/`](docs/planning/):
+
+| קובץ | מה יש בו |
+|---|---|
+| [תוכנית-עבודה.md](docs/planning/%D7%AA%D7%95%D7%9B%D7%A0%D7%99%D7%AA-%D7%A2%D7%91%D7%95%D7%93%D7%94.md) | מבט על העבודה כולה — מה נמסר, מה נשאר, לוח זמנים וסיכונים |
+| [תוכנית-מימוש.md](docs/planning/%D7%AA%D7%95%D7%9B%D7%A0%D7%99%D7%AA-%D7%9E%D7%99%D7%9E%D7%95%D7%A9.md) | המימוש שלב-אחר-שלב, שלוש ביקורות, ו**יומן של 102 החלטות** |
+| [החלטות-פיצרים.md](docs/planning/%D7%94%D7%97%D7%9C%D7%98%D7%95%D7%AA-%D7%A4%D7%99%D7%A6%D7%A8%D7%99%D7%9D.md) | מה נכנס להיקף ומה לא, ולמה |
+
+**יומן ההחלטות הוא המסמך המעניין.** לכל החלטה טכנית — למה הדירוג מחושב ולא
+מאוחסן, למה אין policy ל-UPDATE על `predictions`, למה pg_cron ולא Vercel Cron —
+יש שם שורה עם הנימוק, לרוב יחד עם הבאג שגרם לה.
