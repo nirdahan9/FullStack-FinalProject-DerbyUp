@@ -69,13 +69,13 @@ export default async function ChallengePage() {
   );
 }
 
+/** The DerbyUp minigame header: title in the brand colour, tiny caption under it. */
 function Header() {
   return (
-    <div className="flex flex-col gap-1">
-      <span className="section-label">🎮 האתגר היומי</span>
-      <h1 className="text-3xl font-black leading-tight">גשר הכדורגל</h1>
-      <p className="text-sm text-muted-foreground">
-        שני מועדונים — מצאו שחקן ששיחק בשניהם.
+    <div className="text-center">
+      <h1 className="text-lg font-bold leading-tight text-primary">גשר הכדורגל</h1>
+      <p className="text-[10px] uppercase text-muted-foreground">
+        מצאו שחקן ששיחק בשני המועדונים
       </p>
     </div>
   );
