@@ -19,6 +19,11 @@ const eslintConfig = defineConfig([
     // Linting it would mean editing files we want to keep byte-comparable
     // with their source. Everything we actually write is still linted.
     "components/ui/**",
+    // Generated output, not source: the coverage report and Playwright's
+    // artefacts are both gitignored and both contain vendored scripts.
+    "coverage/**",
+    "playwright-report/**",
+    "test-results/**",
   ]),
 ]);
 
