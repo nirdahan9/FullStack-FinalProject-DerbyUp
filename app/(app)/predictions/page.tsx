@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Target } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { translateTeam } from "@/lib/i18n/teams";
+import { isExactScoreHit } from "@/lib/domain/exact-score";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Pagination } from "@/components/shared/pagination";
 
@@ -36,7 +37,7 @@ export default async function PredictionsPage({
 
   const { data: predictions } = await supabase
     .from("predictions")
-    .select("id, selected_outcome, odds, bonus_pct, points_earned, status, predicted_at, questions(type, games(home_team, away_team, kickoff_at))")
+    .select("id, selected_outcome, odds, bonus_pct, points_earned, status, predicted_at, exact_score, questions(type, games(home_team, away_team, kickoff_at, score_home, score_away))")
     .eq("user_id", user!.id)
     .order("predicted_at", { ascending: false })
     .range(from, from + PAGE_SIZE);
@@ -66,6 +67,11 @@ export default async function PredictionsPage({
               const status = STATUS[p.status] ?? STATUS.pending;
               const potential = Math.round(Number(p.odds) * (1 + (p.bonus_pct ?? 0) / 100) * 100) / 100;
               const earned = Number(p.points_earned ?? 0);
+              const isExactHit = isExactScoreHit(
+                p.exact_score,
+                game?.score_home ?? null,
+                game?.score_away ?? null,
+              );
 
               return (
                 <div key={p.id} className="card-kickoff flex items-center gap-3 py-3">
@@ -78,6 +84,23 @@ export default async function PredictionsPage({
                       {" · "}
                       {p.status === "correct" ? `${earned} נק׳` : `${potential} נק׳ אפשריות`}
                     </span>
+                    {p.exact_score && (
+                      // Whether the call landed is only knowable once the
+                      // fixture has a score, so before then it is stated
+                      // plainly rather than dressed up as a result.
+                      <span
+                        className={`truncate text-[11px] font-bold ${
+                          isExactHit ? "text-amber-500" : "text-muted-foreground"
+                        }`}
+                      >
+                        🎯 {p.exact_score}
+                        {p.status === "pending"
+                          ? " · פגיעה מזכה ב-×3"
+                          : isExactHit
+                            ? " · פגעת! ×3"
+                            : " · לא נפגעה"}
+                      </span>
+                    )}
                   </div>
                   <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${status.className}`}>
                     {status.label}

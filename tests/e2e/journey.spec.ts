@@ -107,21 +107,29 @@ test("§8.2 המסע המרכזי — מהרשמה עד שני הלוחות", as
       await expect(page.getByText("עובד").first()).toBeVisible();
     });
 
-    await test.step("8–10. ניחוש בלחיצה אחת, ממתין, והיחס מוקפא", async () => {
+    await test.step("8–10. ניחוש עם תוצאה מדויקת, ממתין, והיחס מוקפא", async () => {
       await page.goto(`/games/${game.id}`);
       await expect(page.getByText("ארסנל").first()).toBeVisible();
 
+      // The winner market opens the exact-score picker; 1-0 is the opening
+      // guess and the employee takes it, so the fixture below settles 2-0 and
+      // the call misses — the winner points still land in full.
       await page.getByRole("button", { name: /ארסנל/ }).first().click();
-      await expect(page.getByRole("button", { pressed: true }).first()).toBeVisible();
+      await page.getByRole("button", { name: "אישור ניחוש" }).click();
+      // Waits on something that exists only once the prediction is stored.
+      // The tile reads as pressed while the picker is merely open, so it is
+      // not a signal that anything was submitted.
+      await expect(page.getByText(/ניחשת 1-0/)).toBeVisible();
 
       const { data: prediction } = await admin
         .from("predictions")
-        .select("status, odds, points_earned, selected_outcome")
+        .select("status, odds, points_earned, selected_outcome, exact_score")
         .eq("user_id", employee.id)
         .single();
 
       expect(prediction!.status).toBe("pending");
       expect(prediction!.selected_outcome).toBe("home");
+      expect(prediction!.exact_score).toBe("1-0");
       // Frozen at the price shown: later movement cannot change a score.
       expect(Number(prediction!.odds)).toBe(2.1);
       expect(prediction!.points_earned).toBeNull();
@@ -156,6 +164,8 @@ test("§8.2 המסע המרכזי — מהרשמה עד שני הלוחות", as
         .eq("user_id", employee.id)
         .single();
       expect(prediction!.status).toBe("correct");
+      // 2-0, not the 1-0 that was called: the winner points pay in full and
+      // the exact-score bonus simply does not apply.
       expect(Number(prediction!.points_earned)).toBe(2.1);
 
       await context.addCookies([sessionCookie(employee, "localhost")]);

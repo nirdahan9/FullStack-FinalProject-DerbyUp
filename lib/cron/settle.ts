@@ -210,7 +210,7 @@ async function settleGame(
 
   const { data: predictions } = await supabase
     .from("predictions")
-    .select("id, user_id, selected_outcome, odds, bonus_pct, question_id, odds_provisional")
+    .select("id, user_id, selected_outcome, odds, bonus_pct, question_id, odds_provisional, exact_score")
     .in("question_id", [...correctByQuestion.keys()])
     .eq("status", "pending");
 
@@ -238,8 +238,14 @@ async function settleGame(
       : Number(p.odds);
 
     const result = settlePrediction(
-      { selectedOutcome: p.selected_outcome, odds, bonusPct: p.bonus_pct },
+      {
+        selectedOutcome: p.selected_outcome,
+        odds,
+        bonusPct: p.bonus_pct,
+        exactScore: p.exact_score,
+      },
       correctByQuestion.get(p.question_id)!,
+      { home: scoreHome, away: scoreAway },
     );
     users.add(p.user_id);
     return { id: p.id, ...result, odds };

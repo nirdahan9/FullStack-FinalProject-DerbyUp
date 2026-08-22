@@ -39,6 +39,7 @@ test.describe("§8.3 תרחישי E2E נוספים", () => {
 
     await page.goto(`/games/${game.id}`);
     await page.getByRole("button", { name: /ארסנל/ }).first().click();
+    await page.getByRole("button", { name: "בלי תוצאה" }).click();
     await expect(page.getByRole("button", { name: /ביטול הניחוש/ })).toBeVisible();
 
     await page.getByRole("button", { name: /ביטול הניחוש/ }).click();
@@ -47,7 +48,8 @@ test.describe("§8.3 תרחישי E2E נוספים", () => {
     // The unique index is partial on status <> 'cancelled', so the question is
     // open again — the bug a user reported in stage 6.
     await page.getByRole("button", { name: /צ'לסי/ }).first().click();
-    await expect(page.getByRole("button", { pressed: true }).first()).toBeVisible();
+    await page.getByRole("button", { name: "אישור ניחוש" }).click();
+    await expect(page.getByRole("button", { name: /ביטול הניחוש/ })).toBeVisible();
 
     const { data } = await admin
       .from("predictions")
@@ -176,6 +178,120 @@ test.describe("§8.3 תרחישי E2E נוספים", () => {
     expect(data?.every((n) => n.read_at !== null)).toBe(true);
 
     await admin.from("notifications").delete().eq("user_id", user.id);
+  });
+
+  test("10. תוצאה מדויקת — הבורר, האישור, והדילוג", async ({ page }) => {
+    const game = await world.game(competition, { home: "Arsenal", away: "Chelsea" });
+    const { id: leagueId } = await createLeague();
+
+    await page.goto(`/games/${game.id}`);
+
+    // Picking a winner opens the picker instead of submitting.
+    await page.getByRole("button", { name: /ארסנל/ }).first().click();
+    await expect(page.getByRole("listbox", { name: "ארסנל" })).toBeVisible();
+    await expect(page.getByRole("listbox", { name: "צ'לסי" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "אישור ניחוש" })).toBeVisible();
+
+    // Nothing is stored until the confirm. Scoped to this fixture's questions
+    // rather than to the user, who carries predictions from earlier scenarios.
+    const { data: beforeConfirm } = await admin
+      .from("predictions")
+      .select("id, questions!inner(game_id)")
+      .eq("user_id", user.id)
+      .eq("questions.game_id", game.id);
+    expect(beforeConfirm?.length ?? 0).toBe(0);
+
+    // It opens on 1-0, which already agrees with a home pick, and the payout
+    // shown is 2.10 × 3.
+    await expect(page.getByText(/6\.3 נק׳ אם תפגע/)).toBeVisible();
+
+    await page.getByRole("button", { name: "אישור ניחוש" }).click();
+    await expect(page.getByText(/ניחשת 1-0/)).toBeVisible();
+
+    const { data } = await admin
+      .from("predictions")
+      .select("selected_outcome, exact_score, questions!inner(game_id)")
+      .eq("user_id", user.id)
+      .eq("questions.game_id", game.id)
+      .single();
+    expect(data?.selected_outcome).toBe("home");
+    expect(data?.exact_score).toBe("1-0");
+
+    await admin.from("predictions").delete().eq("user_id", user.id);
+    await admin.from("leagues").delete().eq("id", leagueId);
+  });
+
+  test("11. תיקו נועל את שני הגלגלים על אותו מספר", async ({ page }) => {
+    const game = await world.game(competition, { home: "Liverpool", away: "Arsenal" });
+    const { id: leagueId } = await createLeague();
+
+    await page.goto(`/games/${game.id}`);
+    await page.getByRole("button", { name: /תיקו/ }).first().click();
+
+    // A draw opens level rather than on the home-win default, so the form is
+    // never in a state it would refuse.
+    await page.getByRole("button", { name: "אישור ניחוש" }).click();
+    await expect(page.getByText(/ניחשת 1-1/)).toBeVisible();
+
+    const { data } = await admin
+      .from("predictions")
+      .select("selected_outcome, exact_score, questions!inner(game_id)")
+      .eq("user_id", user.id)
+      .eq("questions.game_id", game.id)
+      .single();
+    expect(data?.selected_outcome).toBe("draw");
+    expect(data?.exact_score).toBe("1-1");
+
+    await admin.from("predictions").delete().eq("user_id", user.id);
+    await admin.from("leagues").delete().eq("id", leagueId);
+  });
+
+  test("12. \"בלי תוצאה\" שומר את הניחוש בלי הבונוס", async ({ page }) => {
+    const game = await world.game(competition, { home: "Chelsea", away: "Arsenal" });
+    const { id: leagueId } = await createLeague();
+
+    await page.goto(`/games/${game.id}`);
+    await page.getByRole("button", { name: /צ'לסי/ }).first().click();
+    await page.getByRole("button", { name: "בלי תוצאה" }).click();
+
+    await expect(page.getByRole("button", { name: /ביטול הניחוש/ })).toBeVisible();
+    await expect(page.getByText(/ניחשת .*-/)).toBeHidden();
+
+    const { data } = await admin
+      .from("predictions")
+      .select("selected_outcome, exact_score, questions!inner(game_id)")
+      .eq("user_id", user.id)
+      .eq("questions.game_id", game.id)
+      .single();
+    expect(data?.selected_outcome).toBe("home");
+    expect(data?.exact_score).toBe(null);
+
+    await admin.from("predictions").delete().eq("user_id", user.id);
+    await admin.from("leagues").delete().eq("id", leagueId);
+  });
+
+  test("13. שוקי Over/Under ו-BTTS נשארים בלחיצה אחת", async ({ page }) => {
+    const game = await world.game(competition, { home: "Arsenal", away: "Liverpool" });
+    const { id: leagueId } = await createLeague();
+
+    await page.goto(`/games/${game.id}`);
+    await page.getByRole("button", { name: /מעל 2.5/ }).first().click();
+
+    // No picker, no confirm — the prediction is placed by the tap itself.
+    await expect(page.getByRole("button", { name: "אישור ניחוש" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: /ביטול הניחוש/ })).toBeVisible();
+
+    const { data } = await admin
+      .from("predictions")
+      .select("selected_outcome, exact_score, questions!inner(game_id)")
+      .eq("user_id", user.id)
+      .eq("questions.game_id", game.id)
+      .single();
+    expect(data?.selected_outcome).toBe("over");
+    expect(data?.exact_score).toBe(null);
+
+    await admin.from("predictions").delete().eq("user_id", user.id);
+    await admin.from("leagues").delete().eq("id", leagueId);
   });
 
   /** A league on the test tournament, so its fixtures are predictable. */

@@ -318,6 +318,7 @@ export type Database = {
         Row: {
           bonus_pct: number
           cancelled_at: string | null
+          exact_score: string | null
           id: string
           odds: number
           odds_provisional: boolean
@@ -332,6 +333,7 @@ export type Database = {
         Insert: {
           bonus_pct?: number
           cancelled_at?: string | null
+          exact_score?: string | null
           id?: string
           odds: number
           odds_provisional?: boolean
@@ -346,6 +348,7 @@ export type Database = {
         Update: {
           bonus_pct?: number
           cancelled_at?: string | null
+          exact_score?: string | null
           id?: string
           odds?: number
           odds_provisional?: boolean
@@ -380,6 +383,7 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          is_site_admin: boolean
           total_correct: number
           total_points: number
           total_predictions: number
@@ -391,6 +395,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          is_site_admin?: boolean
           total_correct?: number
           total_points?: number
           total_predictions?: number
@@ -402,6 +407,7 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          is_site_admin?: boolean
           total_correct?: number
           total_points?: number
           total_predictions?: number
@@ -533,6 +539,141 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_user: { Args: { p_user_id: string }; Returns: undefined }
+      admin_list_games: {
+        Args: {
+          p_competition?: number | null
+          p_limit?: number
+          p_offset?: number
+          p_search?: string | null
+          p_status?: string
+        }
+        Returns: {
+          away_team: string
+          competition_id: number
+          competition_name: string
+          fixture_id: number
+          home_team: string
+          id: string
+          kickoff_at: string
+          player_count: number
+          prediction_count: number
+          question_count: number
+          score_away: number | null
+          score_home: number | null
+          settled_at: string | null
+          status: string
+        }[]
+      }
+      admin_list_leagues: {
+        Args: { p_limit?: number; p_offset?: number; p_search?: string | null }
+        Returns: {
+          competition_name: string
+          created_at: string
+          creator_id: string | null
+          creator_name: string | null
+          id: string
+          invite_code: string
+          is_public: boolean
+          member_count: number
+          name: string
+          status: string
+        }[]
+      }
+      admin_list_users: {
+        Args: { p_limit?: number; p_offset?: number; p_search?: string | null }
+        Returns: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          is_site_admin: boolean
+          last_prediction_at: string | null
+          leagues_count: number
+          total_correct: number
+          total_points: number
+          total_predictions: number
+          username: string
+        }[]
+      }
+      admin_overview: {
+        Args: never
+        Returns: {
+          games_awaiting: number
+          games_live: number
+          games_total: number
+          games_upcoming: number
+          leagues_archived: number
+          leagues_private: number
+          leagues_total: number
+          members_private: number
+          points_awarded: number
+          predictions_correct: number
+          predictions_incorrect: number
+          predictions_pending: number
+          predictions_total: number
+          puzzle_attempts_today: number
+          users_new_30d: number
+          users_new_today: number
+          users_total: number
+        }[]
+      }
+      admin_set_site_admin: {
+        Args: { p_user_id: string; p_value: boolean }
+        Returns: undefined
+      }
+      admin_settle_game: {
+        Args: { p_game_id: string; p_score_away: number; p_score_home: number }
+        Returns: undefined
+      }
+      admin_user_detail: {
+        Args: { p_user_id: string }
+        Returns: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          is_site_admin: boolean
+          last_prediction_at: string | null
+          leagues_count: number
+          total_correct: number
+          total_points: number
+          total_predictions: number
+          username: string
+        }[]
+      }
+      admin_user_leagues: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          is_creator: boolean
+          is_public: boolean
+          joined_at: string
+          name: string
+          status: string
+        }[]
+      }
+      admin_user_predictions: {
+        Args: { p_limit?: number; p_user_id: string }
+        Returns: {
+          away_team: string
+          bonus_pct: number
+          correct_outcome: string | null
+          exact_score: string | null
+          game_id: string
+          home_team: string
+          id: string
+          kickoff_at: string
+          odds: number
+          points_earned: number | null
+          predicted_at: string
+          question_type: string
+          selected_outcome: string
+          status: string
+        }[]
+      }
       best_league_rank: { Args: { p_user: string }; Returns: number }
       cancel_prediction: { Args: { p_id: string }; Returns: undefined }
       create_league: {
@@ -556,6 +697,7 @@ export type Database = {
         }[]
       }
       is_league_member: { Args: { p_league_id: string }; Returns: boolean }
+      is_site_admin: { Args: never; Returns: boolean }
       join_league: { Args: { p_invite_code: string }; Returns: string }
       league_standings: {
         Args: { p_league_id: string; p_limit?: number; p_offset?: number }

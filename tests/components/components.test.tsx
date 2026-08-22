@@ -72,6 +72,8 @@ describe("§8.1 קומפוננטות", () => {
       existing: null,
       locked: false,
       provisional: false,
+      homeTeam: "Arsenal",
+      awayTeam: "Chelsea",
     };
 
     it("3. כל אפשרות מציגה את הנקודות שיתקבלו", () => {
@@ -95,12 +97,24 @@ describe("§8.1 קומפוננטות", () => {
       render(
         <QuestionCard
           {...base}
-          existing={{ id: "p1", outcome: "home", status: "pending" }}
+          existing={{ id: "p1", outcome: "home", status: "pending", exactScore: null }}
         />,
       );
 
       expect(screen.getByRole("button", { pressed: true })).toHaveTextContent("ארסנל");
       expect(screen.getByRole("button", { name: /ביטול הניחוש/ })).toBeInTheDocument();
+    });
+
+    it("4א. ניחוש עם תוצאה מדויקת מציג אותה", () => {
+      render(
+        <QuestionCard
+          {...base}
+          existing={{ id: "p1", outcome: "home", status: "pending", exactScore: "2-1" }}
+        />,
+      );
+
+      expect(screen.getByText(/ניחשת 2-1/)).toBeInTheDocument();
+      expect(screen.getByText(/×3/)).toBeInTheDocument();
     });
 
     it("5. משחק שהתחיל — האפשרויות נעולות והסיבה מוצגת", () => {
@@ -122,13 +136,82 @@ describe("§8.1 קומפוננטות", () => {
       let release!: (value: unknown) => void;
       makePrediction.mockReturnValueOnce(new Promise((resolve) => (release = resolve)));
 
-      render(<QuestionCard {...base} />);
-      await user.click(screen.getByRole("button", { name: /ארסנל/ }));
+      // BTTS is a single tap: no exact score to configure, so the click
+      // submits and everything locks immediately.
+      render(
+        <QuestionCard
+          {...base}
+          type="btts"
+          outcomes={[
+            { key: "yes", label: "כן", odds: 1.8 },
+            { key: "no", label: "לא", odds: 1.95 },
+          ]}
+        />,
+      );
+      await user.click(screen.getByRole("button", { name: /כן/ }));
 
       for (const button of screen.getAllByRole("button")) {
         expect(button).toBeDisabled();
       }
-      release({ ok: true, data: { predictionId: "p1", points: 2.1, provisional: false } });
+      release({
+        ok: true,
+        data: { predictionId: "p1", points: 1.8, provisional: false, exactScore: null },
+      });
+    });
+
+    it("15. מנצחת — לחיצה פותחת את בורר התוצאה ולא שולחת", async () => {
+      const user = userEvent.setup();
+      render(<QuestionCard {...base} />);
+
+      await user.click(screen.getByRole("button", { name: /ארסנל/ }));
+
+      expect(makePrediction).not.toHaveBeenCalled();
+      // Two drums, one per team, each a listbox of goal counts.
+      expect(screen.getByRole("listbox", { name: "ארסנל" })).toBeInTheDocument();
+      expect(screen.getByRole("listbox", { name: "צ'לסי" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "אישור ניחוש" })).toBeInTheDocument();
+      // 2.10 × 3 — the number the user is deciding on before they commit.
+      expect(screen.getByText(/6\.3 נק׳ אם תפגע/)).toBeInTheDocument();
+    });
+
+    it("16. \"בלי תוצאה\" שולח את הניחוש בלי הבונוס", async () => {
+      const user = userEvent.setup();
+      makePrediction.mockResolvedValueOnce({
+        ok: true,
+        data: { predictionId: "p1", points: 2.1, provisional: false, exactScore: null },
+      });
+
+      render(<QuestionCard {...base} />);
+      await user.click(screen.getByRole("button", { name: /ארסנל/ }));
+      await user.click(screen.getByRole("button", { name: "בלי תוצאה" }));
+
+      expect(makePrediction).toHaveBeenCalledWith({
+        questionId: "q1",
+        outcome: "home",
+        exactScore: null,
+      });
+    });
+
+    it("17. הבורר נפתח על תוצאה שכבר מתאימה לבחירה", async () => {
+      const user = userEvent.setup();
+      makePrediction.mockResolvedValueOnce({
+        ok: true,
+        data: { predictionId: "p1", points: 10.2, provisional: false, exactScore: "1-1" },
+      });
+
+      render(<QuestionCard {...base} />);
+      await user.click(screen.getByRole("button", { name: /תיקו/ }));
+
+      // A draw opens on 1-1, not 1-0: the form never starts in a state it
+      // would refuse to submit.
+      expect(screen.queryByText("תיקו = מספרים שווים")).not.toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: "אישור ניחוש" }));
+
+      expect(makePrediction).toHaveBeenCalledWith({
+        questionId: "q1",
+        outcome: "draw",
+        exactScore: "1-1",
+      });
     });
   });
 

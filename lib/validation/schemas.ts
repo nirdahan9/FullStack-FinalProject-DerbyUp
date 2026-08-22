@@ -28,6 +28,17 @@ export const joinLeagueSchema = z.object({
 export const makePredictionSchema = z.object({
   questionId: z.string().uuid("מזהה שאלה לא תקין"),
   outcome: z.string().trim().min(1, "יש לבחור תשובה").max(20),
+  /**
+   * Optional exact-score call, "home-away". Shape only — whether it agrees
+   * with the chosen outcome is a domain rule, checked in the action against
+   * `validateExactScore`, because only the domain knows that "home" and 1-2
+   * contradict each other.
+   */
+  exactScore: z
+    .string()
+    .regex(/^[0-9]-[0-9]$/, "פורמט: 0-0")
+    .optional()
+    .nullable(),
 });
 
 export const cancelPredictionSchema = z.object({
@@ -60,4 +71,18 @@ export const submitPuzzleAnswerSchema = z.object({
 
 export const updateProfileSchema = z.object({
   displayName: z.string().trim().min(2, "השם קצר מדי").max(60, "השם ארוך מדי"),
+});
+
+/**
+ * Site administration. Range checks only — who may call these is decided in
+ * Postgres, by the SECURITY DEFINER functions the actions go through.
+ */
+export const adminSettleSchema = z.object({
+  gameId: z.string().uuid("מזהה משחק לא תקין"),
+  scoreHome: z.number().int().min(0, "תוצאה לא תקינה").max(99, "תוצאה לא תקינה"),
+  scoreAway: z.number().int().min(0, "תוצאה לא תקינה").max(99, "תוצאה לא תקינה"),
+});
+
+export const adminUserSchema = z.object({
+  userId: z.string().uuid("מזהה משתמש לא תקין"),
 });

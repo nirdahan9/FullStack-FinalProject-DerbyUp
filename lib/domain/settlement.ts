@@ -1,4 +1,5 @@
-import { pointsForCorrectPrediction } from "./scoring";
+import { exactScoreMultiplier } from "./exact-score";
+import { pointsForCorrectPrediction, round2 } from "./scoring";
 import type { PredictionStatus, QuestionType } from "./types";
 
 /**
@@ -38,18 +39,42 @@ export type SettlementResult = {
  * `odds` and `bonusPct` must be the values stored on the prediction when it
  * was made. Reading them from the question at settlement time would let odds
  * that moved after kickoff change what a user scored.
+ *
+ * `exactScore` is the optional call that came with a winner prediction. It can
+ * only multiply a win — a missed score costs nothing, which is the whole point
+ * of offering it. The final score is passed separately because the prediction
+ * never stores it.
  */
 export function settlePrediction(
-  prediction: { selectedOutcome: string; odds: number; bonusPct?: number },
+  prediction: {
+    selectedOutcome: string;
+    odds: number;
+    bonusPct?: number;
+    exactScore?: string | null;
+  },
   correctOutcome: string,
+  finalScore?: { home: number | null; away: number | null },
 ): SettlementResult {
   const isCorrect = prediction.selectedOutcome === correctOutcome;
+  if (!isCorrect) return { status: "incorrect", pointsEarned: 0 };
 
+  const base = pointsForCorrectPrediction(prediction.odds, prediction.bonusPct ?? 0);
+  const multiplier = exactScoreMultiplier(
+    true,
+    prediction.exactScore,
+    finalScore?.home ?? null,
+    finalScore?.away ?? null,
+  );
+
+  // The base is rounded before it is multiplied, deliberately. It is the
+  // number the user was shown on the tile — 7.15 at a 50% bonus reads as
+  // 10.73 — and tripling what they were shown is the answer they expect.
+  // Multiplying the unrounded 10.724999… would pay 32.18 against a promised
+  // 32.19, and being a hundredth short of the advertised figure is worse than
+  // being a hundredth generous. The DerbyUp app rounds in the same order.
   return {
-    status: isCorrect ? "correct" : "incorrect",
-    pointsEarned: isCorrect
-      ? pointsForCorrectPrediction(prediction.odds, prediction.bonusPct ?? 0)
-      : 0,
+    status: "correct",
+    pointsEarned: multiplier === 1 ? base : round2(base * multiplier),
   };
 }
 

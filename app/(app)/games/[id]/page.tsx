@@ -38,7 +38,7 @@ export default async function GamePage({
         .eq("user_id", user!.id),
       supabase
         .from("predictions")
-        .select("id, question_id, selected_outcome, odds, bonus_pct, points_earned, status")
+        .select("id, question_id, selected_outcome, odds, bonus_pct, points_earned, status, exact_score")
         .eq("user_id", user!.id),
     ]);
 
@@ -126,11 +126,14 @@ export default async function GamePage({
                     id: existing.id,
                     outcome: existing.selected_outcome,
                     status: existing.status,
+                    exactScore: existing.exact_score,
                   }
                 : null
             }
             locked={locked}
             lockReason={lockReason}
+            homeTeam={game.home_team}
+            awayTeam={game.away_team}
             provisional={q.odds_provisional}
           />
         );

@@ -7,7 +7,12 @@ import {
   makePredictionSchema,
 } from "@/lib/validation/schemas";
 import { validatePrediction } from "@/lib/domain/prediction-rules";
-import { pointsForCorrectPrediction } from "@/lib/domain/scoring";
+import {
+  EXACT_SCORE_MULTIPLIER,
+  validateExactScore,
+  type ExactScoreRejection,
+} from "@/lib/domain/exact-score";
+import { pointsForCorrectPrediction, round2 } from "@/lib/domain/scoring";
 import type { Outcome } from "@/lib/football-api/types";
 import type { QuestionType } from "@/lib/domain/types";
 import { actionError, type ActionResult } from "./types";
@@ -23,13 +28,29 @@ const REJECTION_MESSAGES: Record<string, string> = {
   CANCEL_WINDOW_CLOSED: "לא ניתן לבטל — נותרו פחות מ-10 דקות לפתיחה",
 };
 
+/** Same wording the DerbyUp app shows under its score picker. */
+const EXACT_SCORE_MESSAGES: Record<ExactScoreRejection, string> = {
+  INVALID_FORMAT: "פורמט: 0-0",
+  DRAW_NEEDS_EQUAL: "תיקו = מספרים שווים",
+  NOT_A_DRAW: "לא יכולה להיות תיקו",
+  HOME_MUST_LEAD: "הקבוצה הביתית חייבת להוביל",
+  AWAY_MUST_LEAD: "קבוצת החוץ חייבת להוביל",
+};
+
 function messageFor(reason: string): string {
   return REJECTION_MESSAGES[reason] ?? "אירעה שגיאה. נסה שוב";
 }
 
 export async function makePrediction(
-  input: { questionId: string; outcome: string },
-): Promise<ActionResult<{ predictionId: string; points: number; provisional: boolean }>> {
+  input: { questionId: string; outcome: string; exactScore?: string | null },
+): Promise<
+  ActionResult<{
+    predictionId: string;
+    points: number;
+    provisional: boolean;
+    exactScore: string | null;
+  }>
+> {
   const parsed = makePredictionSchema.safeParse(input);
   if (!parsed.success) return actionError("קלט לא תקין");
 
@@ -82,6 +103,20 @@ export async function makePrediction(
 
   if (!verdict.ok) return actionError(messageFor(verdict.reason));
 
+  // The exact score rides on the winner call and nothing else: it is defined
+  // against home/draw/away, and the settlement rule compares it to the final
+  // score of the fixture.
+  const exactScore =
+    question.type === "match_result" ? (parsed.data.exactScore ?? null) : null;
+
+  if (exactScore) {
+    const rejection = validateExactScore(exactScore, parsed.data.outcome);
+    // Rejected rather than stored: a score that contradicts the chosen outcome
+    // could never win the bonus, so accepting it would be accepting something
+    // worthless while looking like it counts.
+    if (rejection) return actionError(EXACT_SCORE_MESSAGES[rejection]);
+  }
+
   // Odds are read from the question and copied onto the prediction. Reading
   // them again at settlement would let a line that moved after kickoff change
   // what somebody already scored.
@@ -111,6 +146,7 @@ export async function makePrediction(
       // prediction is scored at the price on the day instead of at the
       // placeholder shown now.
       odds_provisional: question.odds_provisional,
+      exact_score: exactScore,
     })
     .select("id")
     .single();
@@ -125,12 +161,17 @@ export async function makePrediction(
   revalidatePath("/predictions");
   revalidatePath("/dashboard");
 
+  const base = pointsForCorrectPrediction(chosen.odds, bonusPct);
+
   return {
     ok: true,
     data: {
       predictionId: created.id,
-      points: pointsForCorrectPrediction(chosen.odds, bonusPct),
+      // What the user stands to win, exact-score bonus included, so the
+      // confirmation names the number they were shown before submitting.
+      points: exactScore ? round2(base * EXACT_SCORE_MULTIPLIER) : base,
       provisional: question.odds_provisional,
+      exactScore,
     },
   };
 }
