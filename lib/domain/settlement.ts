@@ -28,6 +28,33 @@ export function resolveOutcome(
   }
 }
 
+/**
+ * Which price a prediction is scored at.
+ *
+ * A prediction placed before the provider had priced the fixture froze a
+ * placeholder, and `oddsProvisional` marks it. Those are scored at the price
+ * the question carries by the time it is resolved, so predicting early is
+ * never worth more — or less — than predicting late. Everything else keeps
+ * the price it froze, because a line that moved after the pick was made must
+ * not change what the pick was worth.
+ *
+ * `currentOdds` is null when the question has no price for that outcome at
+ * all, which leaves the frozen value as the only number available.
+ *
+ * Lives here rather than inside settlement's own loop because the live layer
+ * has to answer the identical question mid-match; two copies of this choice
+ * would show one number during the game and credit another after it.
+ */
+export function effectiveOdds(prediction: {
+  odds: number;
+  currentOdds?: number | null;
+  oddsProvisional?: boolean;
+}): number {
+  return prediction.oddsProvisional
+    ? prediction.currentOdds ?? prediction.odds
+    : prediction.odds;
+}
+
 export type SettlementResult = {
   status: Extract<PredictionStatus, "correct" | "incorrect">;
   pointsEarned: number;

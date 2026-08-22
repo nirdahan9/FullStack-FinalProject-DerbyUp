@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  effectiveOdds,
   resolveOutcome,
   settlePrediction,
   voidPrediction,
@@ -73,5 +74,26 @@ describe("settlePrediction", () => {
 
   it("voids without rewarding or punishing", () => {
     expect(voidPrediction()).toEqual({ status: "void", pointsEarned: 0 });
+  });
+});
+
+/** docs/04-test-spec.md §2.3 */
+describe("effectiveOdds", () => {
+  it("keeps the frozen price for an ordinary prediction", () => {
+    expect(effectiveOdds({ odds: 2.5, currentOdds: 9, oddsProvisional: false })).toBe(2.5);
+  });
+
+  it("takes the question's price for a provisional one", () => {
+    // Placed before the fixture was priced, so the placeholder it froze is not
+    // a price anyone was offered.
+    expect(effectiveOdds({ odds: 2.5, currentOdds: 7.15, oddsProvisional: true })).toBe(7.15);
+  });
+
+  it("falls back to the frozen value when the question was never priced", () => {
+    expect(effectiveOdds({ odds: 2.5, currentOdds: null, oddsProvisional: true })).toBe(2.5);
+  });
+
+  it("treats a missing flag as not provisional", () => {
+    expect(effectiveOdds({ odds: 2.5, currentOdds: 9 })).toBe(2.5);
   });
 });

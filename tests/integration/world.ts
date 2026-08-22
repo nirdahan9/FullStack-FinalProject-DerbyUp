@@ -216,6 +216,7 @@ export class World {
       points?: number | null;
       predictedAt?: Date;
       bonusPct?: number;
+      exactScore?: string;
     } = {},
   ) {
     const { data, error } = await admin
@@ -228,6 +229,7 @@ export class World {
         bonus_pct: opts.bonusPct ?? 0,
         status: opts.status ?? "pending",
         points_earned: opts.points ?? null,
+        ...(opts.exactScore ? { exact_score: opts.exactScore } : {}),
         ...(opts.predictedAt ? { predicted_at: opts.predictedAt.toISOString() } : {}),
       })
       .select("id")

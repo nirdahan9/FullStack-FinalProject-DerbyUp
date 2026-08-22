@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchFixturesByIds } from "@/lib/football-api/client";
-import { resolveOutcome, settlePrediction } from "@/lib/domain/settlement";
+import { effectiveOdds, resolveOutcome, settlePrediction } from "@/lib/domain/settlement";
 import { awardAchievements } from "@/lib/achievements/award";
 import { translateTeam } from "@/lib/i18n/teams";
 import type { QuestionType } from "@/lib/domain/types";
@@ -117,6 +117,10 @@ export async function settleFinishedGames(now = new Date()): Promise<SettleRepor
           status: isAbandoned ? live.status : "finished",
           score_home: live.scoreHome,
           score_away: live.scoreAway,
+          // The last minute the live sync saw. Nothing renders it once the
+          // fixture is settled, but leaving "55'" on a finished match is
+          // residue that would eventually be read as fact by something.
+          minute: null,
           settled_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -230,12 +234,11 @@ async function settleGame(
   // statement — but they are computed first and sent as a batch of updates
   // rather than a query per prediction.
   const updates = predictions.map((p) => {
-    // A provisional prediction takes the price at kickoff; a normal one keeps
-    // the price it froze. Falling back to the frozen value covers the case
-    // where a fixture was never priced at all.
-    const odds = p.odds_provisional
-      ? priceByQuestion.get(p.question_id)?.get(p.selected_outcome) ?? Number(p.odds)
-      : Number(p.odds);
+    const odds = effectiveOdds({
+      odds: Number(p.odds),
+      currentOdds: priceByQuestion.get(p.question_id)?.get(p.selected_outcome) ?? null,
+      oddsProvisional: p.odds_provisional,
+    });
 
     const result = settlePrediction(
       {

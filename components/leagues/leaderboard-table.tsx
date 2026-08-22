@@ -22,6 +22,7 @@ export function LeaderboardTable({
   creatorId,
   emptyLabel = "אין עדיין נקודות",
   showCorrectCount = true,
+  liveDeltas,
 }: {
   rows: ScoreRow[];
   currentUserId?: string;
@@ -29,6 +30,13 @@ export function LeaderboardTable({
   emptyLabel?: string;
   /** The site-wide board has no per-question breakdown to show. */
   showCorrectCount?: boolean;
+  /**
+   * Points each member is earning from matches still being played, for
+   * display. `rows` already carries them inside `points` so the ranking sorts
+   * on the running total; this only says how much of that total is not final
+   * yet. A member absent from the map has nothing in progress.
+   */
+  liveDeltas?: Map<string, number>;
 }) {
   if (!rows.length) {
     return (
@@ -42,6 +50,7 @@ export function LeaderboardTable({
     <div className="flex flex-col gap-2">
       {rankRows(rows).map((row) => {
         const isMe = row.userId === currentUserId;
+        const live = liveDeltas?.get(row.userId) ?? 0;
 
         return (
           <div
@@ -84,13 +93,31 @@ export function LeaderboardTable({
               )}
             </div>
 
-            <span className="shrink-0 text-sm font-black text-primary">
-              {row.points.toLocaleString("he-IL", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}{" "}
-              נק׳
-            </span>
+            <div className="flex shrink-0 flex-col items-end">
+              <span className="text-sm font-black text-primary">
+                {row.points.toLocaleString("he-IL", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}{" "}
+                נק׳
+              </span>
+              {live > 0 && (
+                // Shown as an addition rather than folded silently into the
+                // total, because it can be taken away again: an equaliser
+                // removes it. A member who saw 21.45 and later sees 14.30
+                // deserves to have been told which part was provisional.
+                <span
+                  dir="ltr"
+                  className="text-[10px] font-bold text-emerald-600 tabular-nums dark:text-emerald-400"
+                >
+                  +
+                  {live.toLocaleString("he-IL", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              )}
+            </div>
           </div>
         );
       })}

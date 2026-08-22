@@ -2,8 +2,12 @@ import { notFound } from "next/navigation";
 import { Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { QuestionCard } from "@/components/games/question-card";
+import { LiveScore } from "@/components/games/live-score";
+import { LiveRefresher } from "@/components/shared/live-refresher";
+import { projectPrediction } from "@/lib/domain/live-projection";
 import { CANCEL_WINDOW_MINUTES } from "@/lib/domain/prediction-rules";
 import { FixtureLabel, FixtureScore } from "@/components/shared/fixture";
+import type { QuestionType } from "@/lib/domain/types";
 import type { Outcome } from "@/lib/football-api/types";
 
 export default async function GamePage({
@@ -19,7 +23,7 @@ export default async function GamePage({
 
   const { data: game } = await supabase
     .from("games")
-    .select("id, home_team, away_team, home_logo, away_logo, kickoff_at, status, competition_id, score_home, score_away, competitions(name)")
+    .select("id, home_team, away_team, home_logo, away_logo, kickoff_at, status, competition_id, score_home, score_away, minute, competitions(name)")
     .eq("id", id)
     .maybeSingle();
 
@@ -77,6 +81,17 @@ export default async function GamePage({
         ? "המשחק כבר התחיל"
         : undefined;
 
+  // A match in progress with a score on the row: everything below can show
+  // what each prediction is currently earning. `score_home` is checked rather
+  // than assumed — a fixture can flip to 'live' a beat before the first score
+  // arrives, and projecting against a null would score everyone as if it were
+  // 0-0.
+  const isLive =
+    game.status === "live" && game.score_home !== null && game.score_away !== null;
+  const liveScore = isLive
+    ? { home: game.score_home as number, away: game.score_away as number }
+    : null;
+
   const kickoffLabel = kickoff.toLocaleString("he-IL", {
     weekday: "long",
     day: "numeric",
@@ -109,6 +124,20 @@ export default async function GamePage({
         </div>
       )}
 
+      {isLive && (
+        <div className="card-kickoff flex flex-col items-center gap-1 border border-destructive/30 py-4">
+          <LiveScore
+            scoreHome={game.score_home}
+            scoreAway={game.score_away}
+            minute={game.minute}
+            className="scale-150"
+          />
+          <span className="mt-2 text-xs text-muted-foreground">
+            התוצאה מתעדכנת בזמן אמת
+          </span>
+        </div>
+      )}
+
       {bonusPct > 0 && (
         <p className="flex items-center gap-2 rounded-2xl bg-primary/10 px-4 py-3 text-sm font-bold text-primary">
           <Star className="h-4 w-4 fill-current" />
@@ -118,6 +147,24 @@ export default async function GamePage({
 
       {ordered.map((q) => {
         const existing = byQuestion.get(q.id);
+
+        // Only for a prediction still pending. Once settlement has run the
+        // number on the row is the real one, and a projection alongside it
+        // would be a second answer to a question already decided.
+        const live =
+          liveScore && existing && existing.status === "pending"
+            ? projectPrediction(
+                {
+                  selectedOutcome: existing.selected_outcome,
+                  odds: Number(existing.odds),
+                  bonusPct: existing.bonus_pct,
+                  exactScore: existing.exact_score,
+                },
+                q.type as QuestionType,
+                liveScore,
+              )
+            : null;
+
         return (
           <QuestionCard
             key={q.id}
@@ -140,6 +187,7 @@ export default async function GamePage({
             homeTeam={game.home_team}
             awayTeam={game.away_team}
             provisional={q.odds_provisional}
+            live={live}
           />
         );
       })}
@@ -149,6 +197,8 @@ export default async function GamePage({
           ניתן לבטל ניחוש עד {CANCEL_WINDOW_MINUTES} דקות לפני שריקת הפתיחה.
         </p>
       )}
+
+      {game.status === "live" && <LiveRefresher />}
     </div>
   );
 }

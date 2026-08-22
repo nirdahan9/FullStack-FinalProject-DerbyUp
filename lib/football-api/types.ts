@@ -24,6 +24,12 @@ export type FixtureDto = {
   status: GameStatus;
   scoreHome: number | null;
   scoreAway: number | null;
+  /**
+   * Elapsed minutes while a match is in progress, null otherwise. Carried by
+   * every fixture read so the live sync and the daily sync share one shape;
+   * only the live sync has anything to put in it.
+   */
+  minute: number | null;
 };
 
 /** Decimal odds for the three markets we score on. */

@@ -294,6 +294,53 @@ test.describe("§8.3 תרחישי E2E נוספים", () => {
     await admin.from("leagues").delete().eq("id", leagueId);
   });
 
+  test("14. משחק חי — התוצאה על המסך והנקודות נספרות בטבלה", async ({ page }) => {
+    const game = await world.game(competition, {
+      home: "Arsenal",
+      away: "Chelsea",
+      odds: 2.1,
+      kickoffAt: new Date(Date.now() - 3_600_000),
+    });
+    const { id: leagueId } = await createLeague();
+
+    // A prediction on the winner market, placed before the whistle.
+    const { data: question } = await admin
+      .from("questions")
+      .select("id")
+      .eq("game_id", game.id)
+      .eq("type", "match_result")
+      .single();
+    await admin.from("predictions").insert({
+      user_id: user.id,
+      question_id: question!.id,
+      selected_outcome: "home",
+      odds: 2.1,
+    });
+
+    // What the live sync writes: Arsenal ahead after 63 minutes.
+    await admin
+      .from("games")
+      .update({ status: "live", score_home: 1, score_away: 0, minute: 63 })
+      .eq("id", game.id);
+
+    await page.goto("/games");
+    await expect(page.getByText("🔴 חי עכשיו")).toBeVisible();
+    await expect(page.getByText("1-0")).toBeVisible();
+    await expect(page.getByText("63'")).toBeVisible();
+
+    await page.goto(`/games/${game.id}`);
+    await expect(page.getByText(/צובר כרגע 2.1 נק׳/)).toBeVisible();
+
+    // The table counts it while the match is still being played.
+    await page.goto(`/leagues/${leagueId}`);
+    await expect(page.getByText("מתעדכן חי")).toBeVisible();
+    await expect(page.getByText("+2.10")).toBeVisible();
+    await expect(page.getByText(/2.10 נק׳/).first()).toBeVisible();
+
+    await admin.from("predictions").delete().eq("user_id", user.id);
+    await admin.from("leagues").delete().eq("id", leagueId);
+  });
+
   /** A league on the test tournament, so its fixtures are predictable. */
   async function createLeague() {
     const { data, error } = await admin

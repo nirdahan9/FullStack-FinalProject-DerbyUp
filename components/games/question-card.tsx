@@ -62,6 +62,7 @@ export function QuestionCard({
   provisional,
   homeTeam,
   awayTeam,
+  live,
 }: {
   questionId: string;
   type: string;
@@ -74,6 +75,12 @@ export function QuestionCard({
   provisional: boolean;
   homeTeam: string;
   awayTeam: string;
+  /**
+   * What this prediction is earning against the score as it stands, while the
+   * match is being played. Null once it is settled — at that point the number
+   * is no longer a projection and belongs to the prediction itself.
+   */
+  live?: { points: number; winningNow: boolean } | null;
 }) {
   const [pending, startTransition] = useTransition();
   const [current, setCurrent] = useState(existing);
@@ -249,6 +256,20 @@ export function QuestionCard({
         <p className="flex items-center gap-1 text-xs font-bold text-amber-500">
           🎯 ניחשת <ExactScore value={current.exactScore} /> · פגיעה מזכה
           ב-×{EXACT_SCORE_MULTIPLIER}
+        </p>
+      )}
+
+      {/* Said as "right now" rather than as a score, because it is not one
+          yet. A goal in the 88th minute takes it back. */}
+      {live && current && (
+        <p
+          className={`flex items-center gap-1 text-xs font-bold ${
+            live.winningNow ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
+          }`}
+        >
+          {live.winningNow
+            ? `🔴 צובר כרגע ${live.points} נק׳ — לא סופי`
+            : "🔴 כרגע לא צובר נקודות"}
         </p>
       )}
 

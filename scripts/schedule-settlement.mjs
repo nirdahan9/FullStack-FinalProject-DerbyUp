@@ -1,9 +1,10 @@
 /**
- * Loads the cron secret and site URL into Supabase Vault, then applies the
- * settlement schedule.
+ * Loads the cron secret and site URL into Supabase Vault, then applies every
+ * pg_cron schedule the product runs.
  *
- * Kept out of the migration so no secret is committed: the migration defines
- * the job, this supplies the values it reads at run time.
+ * Kept out of the migrations so no secret is committed: a migration defines
+ * its job, this supplies the values that job reads at run time. Both schedules
+ * read the same two secrets, so they are stored once and applied together.
  *
  *   node scripts/schedule-settlement.mjs
  */
@@ -55,12 +56,19 @@ async function putSecret(name, value, description) {
   `);
 }
 
-await putSecret('derbyup_cron_secret', env.CRON_SECRET, 'Bearer token for the settlement cron');
-await putSecret('derbyup_site_url', SITE_URL, 'Base URL the settlement cron calls');
+await putSecret('derbyup_cron_secret', env.CRON_SECRET, 'Bearer token for the scheduled cron endpoints');
+await putSecret('derbyup_site_url', SITE_URL, 'Base URL the scheduled cron jobs call');
 console.log('✓ secrets stored in vault');
 
-await run(fs.readFileSync('supabase/migrations/20260821200518_schedule_settlement.sql', 'utf8'));
-console.log('✓ schedule applied');
+const SCHEDULES = [
+  'supabase/migrations/20260821200518_schedule_settlement.sql',
+  'supabase/migrations/20260822230100_schedule_live_sync.sql',
+];
+
+for (const file of SCHEDULES) {
+  await run(fs.readFileSync(file, 'utf8'));
+  console.log(`\u2713 applied ${file.split('/').pop()}`);
+}
 
 const jobs = await run(`select jobname, schedule, active from cron.job order by jobname;`);
 console.log('  ', jobs);

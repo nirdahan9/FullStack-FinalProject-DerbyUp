@@ -8,7 +8,9 @@ import { LeagueActions } from "@/components/leagues/league-actions";
 import { LeagueGames, type LeagueGame } from "@/components/leagues/league-games";
 import { LeagueRules } from "@/components/leagues/league-rules";
 import { PrizeList, type Prize } from "@/components/leagues/prize-list";
+import { LiveRefresher } from "@/components/shared/live-refresher";
 import { rankRows, type ScoreRow } from "@/lib/domain/standings";
+import { getLeagueLive } from "@/lib/live/league";
 
 export default async function LeaguePage({
   params,
@@ -36,12 +38,12 @@ export default async function LeaguePage({
 
   if (!league) notFound();
 
-  const [{ data: standings }, { data: games }, { data: predictions }] =
+  const [{ data: standings }, { data: games }, { data: predictions }, live] =
     await Promise.all([
       supabase.rpc("league_standings", { p_league_id: id, p_limit: 100, p_offset: 0 }),
       supabase
         .from("games")
-        .select("id, home_team, away_team, home_logo, away_logo, kickoff_at, status, score_home, score_away")
+        .select("id, home_team, away_team, home_logo, away_logo, kickoff_at, status, score_home, score_away, minute")
         .eq("competition_id", league.competition_id)
         .order("kickoff_at", { ascending: true }),
       supabase
@@ -49,6 +51,7 @@ export default async function LeaguePage({
         .select("question_id, questions(game_id)")
         .eq("user_id", user!.id)
         .in("status", ["pending", "correct", "incorrect", "void"]),
+      getLeagueLive(supabase, id),
     ]);
 
   // A fixture is predictable only once the sync has priced it and written its
@@ -59,11 +62,14 @@ export default async function LeaguePage({
     .in("game_id", (games ?? []).map((g) => g.id));
   const openIds = new Set((openGames ?? []).map((q) => q.game_id));
 
+  // Settled points plus whatever is being earned right now. The sum is what
+  // gets ranked, so a member climbing during a match climbs the table as it
+  // happens — rankRows never learns that a live layer exists.
   const rows: ScoreRow[] = (standings ?? []).map((r) => ({
     userId: r.user_id,
     displayName: r.display_name ?? "משתמש",
     avatarUrl: r.avatar_url,
-    points: Number(r.points),
+    points: Number(r.points) + (live.deltas.get(r.user_id) ?? 0),
     correctCount: Number(r.correct_count),
     joinedAt: new Date(r.joined_at),
   }));
@@ -87,9 +93,16 @@ export default async function LeaguePage({
     status: g.status,
     scoreHome: g.score_home,
     scoreAway: g.score_away,
+    minute: g.minute,
     predictedCount: countByGame.get(g.id) ?? 0,
     isOpen: openIds.has(g.id),
   }));
+
+  // The refresher is mounted for a live fixture even when nobody in the league
+  // predicted it: the score strip is still on screen and still moving. The
+  // standings badge is the narrower question — whether any points are actually
+  // in play — and stays tied to live.hasLive.
+  const hasLiveGame = live.hasLive || leagueGames.some((g) => g.status === "live");
 
   const isAdmin = !league.is_public && league.creator_id === user!.id;
   const isArchived = league.status === "archived";
@@ -191,17 +204,33 @@ export default async function LeaguePage({
       <PrizeList prizes={prizes} note={league.prize_note} />
 
       <section className="flex flex-col gap-3">
-        <span className="section-label">דירוג הליגה</span>
+        <span className="flex items-center gap-2">
+          <span className="section-label">דירוג הליגה</span>
+          {live.hasLive && (
+            <span className="flex items-center gap-1 text-[11px] font-bold text-destructive">
+              <span className="relative flex h-2 w-2" aria-hidden>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-destructive opacity-60" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-destructive" />
+              </span>
+              מתעדכן חי
+            </span>
+          )}
+        </span>
         <LeaderboardTable
           rows={rows}
           currentUserId={user!.id}
           creatorId={league.creator_id}
           emptyLabel="עדיין אין ניחושים בליגה הזו"
+          liveDeltas={live.deltas}
         />
         <p className="text-center text-[11px] text-muted-foreground">
-          נספרים ניחושי מנצח בטורניר של הליגה, מרגע ההצטרפות.
+          {live.hasLive
+            ? "נספרים ניחושי מנצח בטורניר של הליגה, מרגע ההצטרפות. הנקודות בירוק משוערות לפי התוצאה הנוכחית."
+            : "נספרים ניחושי מנצח בטורניר של הליגה, מרגע ההצטרפות."}
         </p>
       </section>
+
+      {hasLiveGame && <LiveRefresher />}
 
       <LeagueGames
         games={leagueGames}

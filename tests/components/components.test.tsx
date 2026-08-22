@@ -1,14 +1,21 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+import { FixturePreview } from "@/components/landing/fixture-preview";
+import { ScoringModel } from "@/components/landing/scoring-model";
 import { GameRow } from "@/components/games/game-row";
+import { LiveScore } from "@/components/games/live-score";
 import { QuestionCard } from "@/components/games/question-card";
 import { LeaderboardTable } from "@/components/leagues/leaderboard-table";
 import { PrizeList } from "@/components/leagues/prize-list";
+import { ThemeColorPicker } from "@/components/layout/theme-color-picker";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Pagination } from "@/components/shared/pagination";
 import { Trophy } from "lucide-react";
+import { EXACT_SCORE_MULTIPLIER } from "@/lib/domain/exact-score";
+import { round2 } from "@/lib/domain/scoring";
+import { THEME_COLOR_KEY, THEME_COLORS } from "@/lib/theme-colors";
 
 /**
  * §8.1 — the components that carry a rule.
@@ -73,6 +80,24 @@ describe("§8.1 קומפוננטות", () => {
       expect(screen.getByText("בחירת העורך")).toBeInTheDocument();
       expect(screen.getByText("פרמייר ליג")).toBeInTheDocument();
     });
+
+    it("18. משחק חי מציג תוצאה ודקה במקום שעת פתיחה", () => {
+      render(<GameRow {...base} live={{ scoreHome: 2, scoreAway: 1, minute: 63 }} />);
+
+      expect(renderedText()).toContain("2-1");
+      expect(screen.getByText("63'")).toBeInTheDocument();
+      // The kick-off time has nothing left to say once the match is under way.
+      expect(screen.queryByText("21:00")).not.toBeInTheDocument();
+    });
+
+    it("18א. משחק חי בלי ניחוש מסומן נעול ולא מזמין לנחש", () => {
+      // validatePrediction refuses a fixture that is not scheduled, so a call
+      // to action here could only produce an error.
+      render(<GameRow {...base} live={{ scoreHome: 0, scoreAway: 0, minute: 12 }} />);
+
+      expect(screen.getByText("נעול")).toBeInTheDocument();
+      expect(screen.queryByText("נחש")).not.toBeInTheDocument();
+    });
   });
 
   describe("QuestionCard", () => {
@@ -134,6 +159,35 @@ describe("§8.1 קומפוננטות", () => {
 
       expect(screen.getByText("המשחק כבר התחיל")).toBeInTheDocument();
       expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    });
+
+    it("19. במשחק חי מוצג כמה הניחוש צובר כרגע", () => {
+      render(
+        <QuestionCard
+          {...base}
+          locked
+          lockReason="המשחק כבר התחיל"
+          existing={{ id: "p1", outcome: "home", status: "pending", exactScore: null }}
+          live={{ points: 7.15, winningNow: true }}
+        />,
+      );
+
+      expect(screen.getByText(/צובר כרגע 7.15 נק׳/)).toBeInTheDocument();
+      // Said as provisional, because an equaliser takes it away again.
+      expect(screen.getByText(/לא סופי/)).toBeInTheDocument();
+    });
+
+    it("19א. ניחוש שאינו מוביל כרגע נאמר במפורש", () => {
+      render(
+        <QuestionCard
+          {...base}
+          locked
+          existing={{ id: "p1", outcome: "away", status: "pending", exactScore: null }}
+          live={{ points: 0, winningNow: false }}
+        />,
+      );
+
+      expect(screen.getByText(/כרגע לא צובר נקודות/)).toBeInTheDocument();
     });
 
     it("5א. יחס משוער מסומן ומוסבר", () => {
@@ -267,6 +321,26 @@ describe("§8.1 קומפוננטות", () => {
       expect(screen.queryByText(/פגיעות/)).not.toBeInTheDocument();
     });
 
+    it("20. תוספת חיה מוצגת בנפרד מהסכום שכבר עובד", () => {
+      // `points` already carries the live points so the ranking sorts on the
+      // running total; the "+" says how much of it is not final yet.
+      render(
+        <LeaderboardTable
+          rows={[{ ...rows[0], points: 19.65 }]}
+          liveDeltas={new Map([["a", 7.15]])}
+        />,
+      );
+
+      expect(screen.getByText(/19.65/)).toBeInTheDocument();
+      expect(screen.getByText("+7.15")).toBeInTheDocument();
+    });
+
+    it("20א. חבר בלי משחק חי לא מקבל סימון", () => {
+      render(<LeaderboardTable rows={rows} liveDeltas={new Map([["a", 7.15]])} />);
+
+      expect(screen.getAllByText(/^\+/)).toHaveLength(1);
+    });
+
     it("לוח ריק מציג את הטקסט שנמסר", () => {
       render(<LeaderboardTable rows={[]} emptyLabel="אף אחד לא ניחש עדיין" />);
       expect(screen.getByText("אף אחד לא ניחש עדיין")).toBeInTheDocument();
@@ -331,6 +405,127 @@ describe("§8.1 קומפוננטות", () => {
         "/leaderboard?page=2",
       );
       expect(screen.getByText("הבא").closest("a")).toBeNull();
+    });
+  });
+  describe("LiveScore", () => {
+    it("21. מציג תוצאה, דקה וסימון נגיש שהמשחק חי", () => {
+      render(<LiveScore scoreHome={1} scoreAway={2} minute={78} />);
+
+      expect(renderedText()).toContain("1-2");
+      expect(screen.getByText("78'")).toBeInTheDocument();
+      // The pulsing dot is decoration; this is what a screen reader gets.
+      expect(screen.getByText("משחק חי")).toBeInTheDocument();
+    });
+
+    it("21א. משחק שהתחיל וטרם התקבלה בו תוצאה מוצג 0-0 ובלי דקה", () => {
+      render(<LiveScore scoreHome={null} scoreAway={null} minute={null} />);
+
+      expect(renderedText()).toContain("0-0");
+      expect(screen.queryByText(/'/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe("ThemeColorPicker", () => {
+    // The picker writes to <html> and to localStorage, neither of which RTL's
+    // cleanup touches, so a leftover class would decide the next test.
+    afterEach(() => {
+      document.documentElement.className = "";
+      localStorage.clear();
+    });
+
+    it("15. מציגה את כל ערכות הצבע, ברירת המחדל מסומנת", () => {
+      render(<ThemeColorPicker />);
+
+      for (const theme of THEME_COLORS) {
+        expect(screen.getByRole("button", { name: theme.label })).toBeInTheDocument();
+      }
+
+      // Nothing saved yet, so the unthemed default is what is selected.
+      expect(screen.getByRole("button", { name: "ברירת מחדל" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+
+    it("16. בחירת ערכה צובעת את הדף ונשמרת, וחזרה לברירת מחדל מנקה", async () => {
+      const user = userEvent.setup();
+      render(<ThemeColorPicker />);
+
+      await user.click(screen.getByRole("button", { name: "מכבי תל אביב" }));
+
+      expect(document.documentElement).toHaveClass("theme-maccabi-ta");
+      expect(localStorage.getItem(THEME_COLOR_KEY)).toBe("maccabi-ta");
+      expect(screen.getByRole("button", { name: "מכבי תל אביב" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+
+      // Switching swaps the class rather than stacking a second one.
+      await user.click(screen.getByRole("button", { name: "ליברפול" }));
+      expect(document.documentElement).not.toHaveClass("theme-maccabi-ta");
+      expect(document.documentElement).toHaveClass("theme-liverpool");
+
+      await user.click(screen.getByRole("button", { name: "ברירת מחדל" }));
+      expect(document.documentElement.className).toBe("");
+      expect(localStorage.getItem(THEME_COLOR_KEY)).toBe("default");
+    });
+  });
+  describe("FixturePreview", () => {
+    const game = {
+      homeTeam: "Arsenal",
+      awayTeam: "Chelsea",
+      homeLogo: null,
+      awayLogo: null,
+      kickoffAt: "2026-09-01T18:00:00Z",
+      competitionName: "פרמייר ליג",
+      outcomes: OUTCOMES,
+      provisional: false,
+    };
+
+    it("22. בלי משחקים במסד — מוצג משחק לדוגמה, ולא כרטיס ריק", () => {
+      render(<FixturePreview games={[]} />);
+
+      // The landing page has to render before the seed has ever run. What it
+      // must not do is quietly present the example as a real fixture.
+      expect(screen.getByText("משחק לדוגמה")).toBeInTheDocument();
+      expect(screen.queryByText("יחסים אמיתיים")).not.toBeInTheDocument();
+    });
+
+    it("23. משחק אמיתי — שמות בעברית, והיחס מוצג כנקודות", () => {
+      render(<FixturePreview games={[game]} />);
+
+      expect(screen.getByText("יחסים אמיתיים")).toBeInTheDocument();
+      expect(screen.getAllByText("ארסנל").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("צ'לסי").length).toBeGreaterThan(0);
+
+      // The whole claim of the page: the price *is* the score.
+      for (const outcome of OUTCOMES) {
+        expect(screen.getByText(`${outcome.odds} נק׳`)).toBeInTheDocument();
+      }
+
+      // And the headline number is the biggest of them, not the first.
+      expect(screen.getByText("3.6 נקודות")).toBeInTheDocument();
+    });
+
+    it("24. יחס זמני נאמר כהערכה, ולא מוגש כמחיר סופי", () => {
+      render(<FixturePreview games={[{ ...game, provisional: true }]} />);
+
+      expect(screen.getByText(/הערכה/)).toBeInTheDocument();
+      expect(screen.queryByText("3.6 נקודות")).not.toBeInTheDocument();
+    });
+  });
+
+  describe("ScoringModel", () => {
+    it("25. הבונוס על תוצאה מדויקת נגזר מהקבוע, ולא כתוב ידנית בעותק", () => {
+      render(<ScoringModel />);
+
+      expect(screen.getByText(`×${EXACT_SCORE_MULTIPLIER} בונוס`)).toBeInTheDocument();
+      // 7.15 at the multiplier, rounded the way the product rounds it —
+      // the raw product is 21.450000000000003. Hard-coding 21.45 in the copy
+      // would let a change to the rule leave the page advertising the old one.
+      expect(
+        screen.getByText(String(round2(7.15 * EXACT_SCORE_MULTIPLIER))),
+      ).toBeInTheDocument();
     });
   });
 });

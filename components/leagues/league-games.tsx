@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { LiveScore } from "@/components/games/live-score";
 import { translateTeam } from "@/lib/i18n/teams";
 import { FixtureScore } from "@/components/shared/fixture";
 
@@ -13,6 +14,8 @@ export type LeagueGame = {
   status: string;
   scoreHome: number | null;
   scoreAway: number | null;
+  /** Minutes played, while the match is in progress. */
+  minute: number | null;
   predictedCount: number;
   /** False for fixtures beyond the odds window — no questions written yet. */
   isOpen: boolean;
@@ -26,6 +29,12 @@ export type LeagueGame = {
  * that tells a member they are falling behind, which a plain fixture list
  * never surfaces. Fixtures that were never open for predictions are excluded
  * from it, so a full-season calendar does not report months of phantom misses.
+ *
+ * Matches in progress sit above the tabs rather than inside either one. They
+ * belong in neither: they are not upcoming, and calling them finished while
+ * they are still being played would be wrong in the one case a member most
+ * wants to look at. They still count towards "פספסתי" — the whistle has gone
+ * and the chance to predict is equally gone.
  */
 export function LeagueGames({
   games,
@@ -36,11 +45,14 @@ export function LeagueGames({
   showFinished: boolean;
   baseUrl: string;
 }) {
+  const live = games.filter((g) => g.status === "live");
   const upcoming = games.filter((g) => g.status === "scheduled");
-  const finished = games.filter((g) => g.status !== "scheduled");
+  const finished = games.filter((g) => g.status !== "scheduled" && g.status !== "live");
 
   const waiting = upcoming.filter((g) => g.predictedCount === 0 && g.isOpen).length;
-  const missed = finished.filter((g) => g.predictedCount === 0 && g.isOpen).length;
+  const missed = [...live, ...finished].filter(
+    (g) => g.predictedCount === 0 && g.isOpen,
+  ).length;
   const played = games.filter((g) => g.predictedCount > 0).length;
 
   const visible = showFinished ? finished : upcoming;
@@ -64,6 +76,37 @@ export function LeagueGames({
           </div>
         ))}
       </div>
+
+      {live.length > 0 && (
+        <div className="flex flex-col gap-2">
+          {live.map((game) => (
+            <Link
+              key={game.id}
+              href={`/games/${game.id}`}
+              className="card-kickoff flex items-center gap-3 border border-destructive/30 py-3 transition-colors hover:bg-secondary/60"
+            >
+              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span dir="rtl" className="truncate text-sm font-bold">
+                  <bdi>{translateTeam(game.homeTeam)}</bdi>
+                  <span className="text-muted-foreground"> נגד </span>
+                  <bdi>{translateTeam(game.awayTeam)}</bdi>
+                </span>
+                <span className="text-[11px] text-muted-foreground">
+                  {game.predictedCount > 0
+                    ? `ניחשת ${game.predictedCount} מתוך 3`
+                    : "לא ניחשת את המשחק הזה"}
+                </span>
+              </div>
+
+              <LiveScore
+                scoreHome={game.scoreHome}
+                scoreAway={game.scoreAway}
+                minute={game.minute}
+              />
+            </Link>
+          ))}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-2 rounded-2xl bg-secondary p-1">
         {[

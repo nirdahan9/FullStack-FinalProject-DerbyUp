@@ -4,6 +4,7 @@ import { GameRow } from "@/components/games/game-row";
 import { EmptyState } from "@/components/shared/empty-state";
 import { CompetitionTabs } from "@/components/games/competition-tabs";
 import { Pagination } from "@/components/shared/pagination";
+import { LiveRefresher } from "@/components/shared/live-refresher";
 
 const PAGE_SIZE = 20;
 
@@ -66,6 +67,25 @@ export default async function GamesPage({
     .order("kickoff_at", { ascending: true })
     .range(from, from + PAGE_SIZE);
 
+  // Matches being played right now, above the list rather than in it. They are
+  // the one thing on this page that cannot be predicted and is still the most
+  // interesting — and until this query existed they were invisible, because a
+  // fixture leaves 'scheduled' the moment it kicks off and the list above
+  // never showed it again.
+  //
+  // Only on the first page. Pagination walks the upcoming calendar; repeating
+  // the same live strip on page four would be noise, and the user reaches page
+  // four by looking forward, not at what is on now.
+  const { data: liveGames } = page === 1
+    ? await supabase
+        .from("games")
+        .select("id, home_team, away_team, home_logo, away_logo, kickoff_at, score_home, score_away, minute, competitions(name)")
+        .in("competition_id", visibleIds)
+        .eq("status", "live")
+        .order("kickoff_at", { ascending: true })
+        .limit(10)
+    : { data: null };
+
   const rows = (games ?? []).slice(0, PAGE_SIZE);
   const hasNext = (games ?? []).length > PAGE_SIZE;
 
@@ -90,12 +110,40 @@ export default async function GamesPage({
         <CompetitionTabs competitions={tabs} active={selectedCompetition} />
       )}
 
+      {(liveGames ?? []).length > 0 && (
+        <section className="flex flex-col gap-2">
+          <span className="section-label">🔴 חי עכשיו</span>
+          {(liveGames ?? []).map((game) => (
+            <GameRow
+              key={game.id}
+              id={game.id}
+              homeTeam={game.home_team}
+              awayTeam={game.away_team}
+              homeLogo={game.home_logo}
+              awayLogo={game.away_logo}
+              kickoffAt={game.kickoff_at}
+              competitionName={game.competitions?.name}
+              isFeatured={featuredIds.has(game.id)}
+              predictedCount={countByGame.get(game.id) ?? 0}
+              live={{
+                scoreHome: game.score_home,
+                scoreAway: game.score_away,
+                minute: game.minute,
+              }}
+            />
+          ))}
+          <LiveRefresher />
+        </section>
+      )}
+
       {rows.length === 0 ? (
-        <EmptyState
-          icon={CalendarDays}
-          title="אין משחקים קרובים"
-          body="המשחקים מסונכרנים מדי יום. חזרו מאוחר יותר."
-        />
+        (liveGames ?? []).length === 0 && (
+          <EmptyState
+            icon={CalendarDays}
+            title="אין משחקים קרובים"
+            body="המשחקים מסונכרנים מדי יום. חזרו מאוחר יותר."
+          />
+        )
       ) : (
         <>
           <div className="flex flex-col gap-2">

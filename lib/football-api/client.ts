@@ -51,7 +51,15 @@ async function apiGet<T>(
 }
 
 type ApiFixture = {
-  fixture: { id: number; date: string; status: { short: string } };
+  fixture: {
+    id: number;
+    date: string;
+    // `elapsed` is the minute a match in progress has reached. Null for a
+    // fixture that has not kicked off, and the provider keeps sending the
+    // final minute after the whistle, which is why nothing reads it once a
+    // fixture is finished.
+    status: { short: string; elapsed: number | null };
+  };
   league: { id: number };
   teams: {
     home: { name: string; logo: string | null };
@@ -59,6 +67,32 @@ type ApiFixture = {
   };
   goals: { home: number | null; away: number | null };
 };
+
+/**
+ * One place where a provider fixture becomes ours.
+ *
+ * Three endpoints return the same payload — the season pull, the settlement
+ * lookup and the live poll — and three copies of this mapping is how a field
+ * added for one of them silently goes missing from the other two.
+ */
+function toFixtureDto(f: ApiFixture): FixtureDto {
+  const status = mapFixtureStatus(f.fixture.status.short);
+  return {
+    fixtureId: f.fixture.id,
+    competitionId: f.league.id,
+    homeTeam: f.teams.home.name,
+    awayTeam: f.teams.away.name,
+    homeLogo: f.teams.home.logo,
+    awayLogo: f.teams.away.logo,
+    kickoffAt: f.fixture.date,
+    status,
+    scoreHome: f.goals.home,
+    scoreAway: f.goals.away,
+    // Only meaningful while the match is being played. A finished fixture
+    // still reports 90, and storing that would leave "90'" on the row forever.
+    minute: status === "live" ? f.fixture.status.elapsed : null,
+  };
+}
 
 /**
  * Fixtures for one competition. Without a date range this returns the whole
@@ -76,18 +110,7 @@ export async function fetchFixtures(
     ...(range ? { from: range.from, to: range.to } : {}),
   });
 
-  return raw.map((f) => ({
-    fixtureId: f.fixture.id,
-    competitionId: f.league.id,
-    homeTeam: f.teams.home.name,
-    awayTeam: f.teams.away.name,
-    homeLogo: f.teams.home.logo,
-    awayLogo: f.teams.away.logo,
-    kickoffAt: f.fixture.date,
-    status: mapFixtureStatus(f.fixture.status.short),
-    scoreHome: f.goals.home,
-    scoreAway: f.goals.away,
-  }));
+  return raw.map(toFixtureDto);
 }
 
 /** Fixtures by id — used at settlement to read final scores. */
@@ -96,18 +119,27 @@ export async function fetchFixturesByIds(ids: number[]): Promise<FixtureDto[]> {
 
   const raw = await apiGet<ApiFixture>("/fixtures", { ids: ids.join("-") });
 
-  return raw.map((f) => ({
-    fixtureId: f.fixture.id,
-    competitionId: f.league.id,
-    homeTeam: f.teams.home.name,
-    awayTeam: f.teams.away.name,
-    homeLogo: f.teams.home.logo,
-    awayLogo: f.teams.away.logo,
-    kickoffAt: f.fixture.date,
-    status: mapFixtureStatus(f.fixture.status.short),
-    scoreHome: f.goals.home,
-    scoreAway: f.goals.away,
-  }));
+  return raw.map(toFixtureDto);
+}
+
+/**
+ * Every match in progress across the given competitions, in one request.
+ *
+ * `live` takes a dash-joined list of league ids, so seven competitions cost
+ * one call rather than seven — which is what makes a once-a-minute schedule
+ * affordable. The DerbyUp app polls per competition
+ * (backend/src/jobs/syncLiveTournaments.js calls fetchLiveByLeague in a loop);
+ * batching is free here because all seven are known up front.
+ *
+ * An empty array short-circuits: `live=` with no value would be a request for
+ * every match on earth.
+ */
+export async function fetchLiveFixtures(leagueIds: readonly number[]): Promise<FixtureDto[]> {
+  if (!leagueIds.length) return [];
+
+  const raw = await apiGet<ApiFixture>("/fixtures", { live: leagueIds.join("-") });
+
+  return raw.map(toFixtureDto);
 }
 
 type ApiOddsEntry = {

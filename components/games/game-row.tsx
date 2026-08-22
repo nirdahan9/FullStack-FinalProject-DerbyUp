@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { Star } from "lucide-react";
+import { LiveScore } from "@/components/games/live-score";
 import { translateTeam } from "@/lib/i18n/teams";
 
 /**
  * A fixture row, matching the shape used in the DerbyUp app: kick-off time on
  * one side, the two teams stacked in the middle, an action on the other.
+ *
+ * A match in progress uses the same row with two substitutions — the running
+ * score where the kick-off time was, and a locked marker where the call to
+ * action was. Same row rather than a second component, because a live fixture
+ * is the same fixture; only two of its four facts have changed.
  */
 export function GameRow({
   id,
@@ -16,6 +22,7 @@ export function GameRow({
   competitionName,
   isFeatured,
   predictedCount,
+  live,
 }: {
   id: string;
   homeTeam: string;
@@ -26,6 +33,8 @@ export function GameRow({
   competitionName?: string;
   isFeatured?: boolean;
   predictedCount: number;
+  /** Set while the match is being played. Absent for a fixture yet to start. */
+  live?: { scoreHome: number | null; scoreAway: number | null; minute: number | null };
 }) {
   const kickoff = new Date(kickoffAt);
   const time = kickoff.toLocaleTimeString("he-IL", {
@@ -42,11 +51,24 @@ export function GameRow({
   return (
     <Link
       href={`/games/${id}`}
-      className="card-kickoff flex items-center gap-3 py-3 transition-colors hover:bg-secondary/60"
+      className={`card-kickoff flex items-center gap-3 py-3 transition-colors hover:bg-secondary/60 ${
+        live ? "border border-destructive/30" : ""
+      }`}
     >
       <div className="flex min-w-[52px] shrink-0 flex-col items-center text-center">
-        <span className="text-sm font-black">{time}</span>
-        <span className="text-[11px] text-muted-foreground">{date}</span>
+        {live ? (
+          <LiveScore
+            scoreHome={live.scoreHome}
+            scoreAway={live.scoreAway}
+            minute={live.minute}
+            className="flex-col gap-0.5"
+          />
+        ) : (
+          <>
+            <span className="text-sm font-black">{time}</span>
+            <span className="text-[11px] text-muted-foreground">{date}</span>
+          </>
+        )}
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -81,12 +103,21 @@ export function GameRow({
 
       <span
         className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
-          predictedCount > 0
+          live || predictedCount > 0
             ? "bg-secondary text-muted-foreground"
             : "bg-primary text-primary-foreground"
         }`}
       >
-        {predictedCount > 0 ? `${predictedCount}/3` : "נחש"}
+        {/* No call to action once the whistle has gone: validatePrediction
+            refuses a fixture that is not 'scheduled', so offering it would be
+            a button that can only fail. */}
+        {live
+          ? predictedCount > 0
+            ? `${predictedCount}/3`
+            : "נעול"
+          : predictedCount > 0
+            ? `${predictedCount}/3`
+            : "נחש"}
       </span>
     </Link>
   );
