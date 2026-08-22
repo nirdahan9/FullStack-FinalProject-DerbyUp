@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Globe, Trophy } from "lucide-react";
+import { ArrowLeft, Globe, Settings, Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { InviteCodeBox } from "@/components/leagues/invite-code-box";
 import { LeaderboardTable } from "@/components/leagues/leaderboard-table";
@@ -169,6 +169,23 @@ export default async function LeaguePage({
           <span className="section-label">קוד הזמנה — שתפו עם חברים</span>
           <InviteCodeBox code={league.invite_code} />
         </div>
+      )}
+
+      {isAdmin && (
+        <Link
+          href={`/leagues/${id}/admin`}
+          className="card-kickoff flex items-center gap-3 py-3 transition-colors hover:bg-secondary/60"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary">
+            <Settings className="h-4 w-4 text-primary" />
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col">
+            <span className="font-bold">ניהול הליגה</span>
+            <span className="truncate text-xs text-muted-foreground">
+              פרסים · משחק השבוע · יישוב ידני
+            </span>
+          </span>
+        </Link>
       )}
 
       <PrizeList prizes={prizes} note={league.prize_note} />

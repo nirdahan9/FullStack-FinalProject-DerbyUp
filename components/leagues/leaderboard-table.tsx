@@ -21,11 +21,14 @@ export function LeaderboardTable({
   currentUserId,
   creatorId,
   emptyLabel = "אין עדיין נקודות",
+  showCorrectCount = true,
 }: {
   rows: ScoreRow[];
   currentUserId?: string;
   creatorId?: string | null;
   emptyLabel?: string;
+  /** The site-wide board has no per-question breakdown to show. */
+  showCorrectCount?: boolean;
 }) {
   if (!rows.length) {
     return (
@@ -74,9 +77,11 @@ export function LeaderboardTable({
                 )}
                 {isMe && <span className="text-[10px] font-normal text-primary">(אתה)</span>}
               </p>
-              <p className="text-[10px] text-muted-foreground">
-                {row.correctCount} פגיעות
-              </p>
+              {showCorrectCount && (
+                <p className="text-[10px] text-muted-foreground">
+                  {row.correctCount} פגיעות
+                </p>
+              )}
             </div>
 
             <span className="shrink-0 text-sm font-black text-primary">

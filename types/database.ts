@@ -542,6 +542,15 @@ export type Database = {
           user_id: string
         }[]
       }
+      settle_game_manually: {
+        Args: {
+          p_game_id: string
+          p_league_id: string
+          p_score_away: number
+          p_score_home: number
+        }
+        Returns: undefined
+      }
       shares_league_with: { Args: { p_user_id: string }; Returns: boolean }
     }
     Enums: {
