@@ -1,14 +1,13 @@
-import Link from "next/link";
 import { Bell, Target, Trophy, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/shared/empty-state";
 import { MarkReadButton } from "@/components/layout/mark-read-button";
+import { NotificationRow } from "@/components/layout/notification-row";
 
 const ICONS = {
   prediction_settled: Target,
   achievement: Trophy,
   league_joined: Users,
-  puzzle_available: Bell,
 } as const;
 
 function timeAgo(iso: string): string {
@@ -90,12 +89,10 @@ export default async function NotificationsPage() {
               </div>
             );
 
-            return n.link_url ? (
-              <Link key={n.id} href={n.link_url} className="transition-opacity hover:opacity-90">
+            return (
+              <NotificationRow key={n.id} id={n.id} href={n.link_url} isUnread={isUnread}>
                 {content}
-              </Link>
-            ) : (
-              <div key={n.id}>{content}</div>
+              </NotificationRow>
             );
           })}
         </div>

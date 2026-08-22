@@ -135,6 +135,49 @@ test.describe("§8.3 תרחישי E2E נוספים", () => {
     expect(box!.x + box!.width).toBeGreaterThan(viewport.width / 2);
   });
 
+  test("9. פתיחת התראה מסמנת אותה כנקראה", async ({ page }) => {
+    // Cleared first: earlier scenarios in this file earn achievements, and
+    // each one produces its own notification.
+    await admin.from("notifications").delete().eq("user_id", user.id);
+
+    await admin.from("notifications").insert([
+      {
+        user_id: user.id,
+        type: "prediction_settled",
+        title: "התראה עם קישור",
+        body: "צדקת",
+        link_url: "/predictions",
+      },
+      {
+        user_id: user.id,
+        type: "achievement",
+        title: "התראה בלי קישור",
+        body: "הישג",
+      },
+    ]);
+
+    await page.goto("/notifications");
+    await expect(page.getByText("2 חדשות")).toBeVisible();
+
+    // A notification with a link: opening it is what marks it read.
+    await page.getByText("התראה עם קישור").click();
+    await page.waitForURL("**/predictions");
+    await page.goto("/notifications");
+    await expect(page.getByText("1 חדשות")).toBeVisible();
+
+    // One without a link is a button instead, so it can still be cleared.
+    await page.getByText("התראה בלי קישור").click();
+    await expect(page.getByText("חדשות")).toBeHidden();
+
+    const { data } = await admin
+      .from("notifications")
+      .select("read_at")
+      .eq("user_id", user.id);
+    expect(data?.every((n) => n.read_at !== null)).toBe(true);
+
+    await admin.from("notifications").delete().eq("user_id", user.id);
+  });
+
   /** A league on the test tournament, so its fixtures are predictable. */
   async function createLeague() {
     const { data, error } = await admin

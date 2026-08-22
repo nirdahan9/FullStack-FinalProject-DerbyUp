@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { awardAchievements } from "@/lib/achievements/award";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createLeagueSchema, joinLeagueSchema } from "@/lib/validation/schemas";
@@ -61,6 +62,14 @@ export async function createLeague(
   const created = data?.[0];
   if (!created) return actionError("אירעה שגיאה ביצירת הליגה");
 
+  // Opening a league is joining one. Awarded here rather than left to the next
+  // settlement, so the badge arrives when it was earned. The RPC already
+  // authenticated through auth.uid(), so a session is guaranteed at this point.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) await awardAchievements(user.id);
+
   revalidatePath("/leagues");
   redirect(`/leagues/${created.league_id}?created=1`);
 }
@@ -84,6 +93,11 @@ export async function joinLeague(
 
   if (error) return actionError(leagueError(error.message));
   if (!data) return actionError("קוד הזמנה לא תקין");
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) await awardAchievements(user.id);
 
   revalidatePath("/leagues");
   revalidatePath("/games");

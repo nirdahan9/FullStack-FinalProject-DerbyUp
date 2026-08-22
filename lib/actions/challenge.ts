@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { submitPuzzleAnswerSchema } from "@/lib/validation/schemas";
 import { checkAnswer, MAX_ATTEMPTS, pointsForAttempt } from "@/lib/domain/puzzle";
+import { awardAchievements } from "@/lib/achievements/award";
 import { actionError, type ActionResult } from "./types";
 
 export type PuzzleResult = {
@@ -97,6 +98,10 @@ export async function submitPuzzleAnswer(
       })
       .eq("id", user.id);
   }
+
+  // Solving the challenge is what earns `first_puzzle`; awarding it here means
+  // a user who only ever plays the challenge still collects badges.
+  if (isCorrect) await awardAchievements(user.id);
 
   const attemptsLeft = MAX_ATTEMPTS - attemptNumber;
   const finished = isCorrect || attemptsLeft === 0;

@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fetchFixturesByIds } from "@/lib/football-api/client";
 import { resolveOutcome, settlePrediction } from "@/lib/domain/settlement";
-import { newlyEarned, type AchievementStats } from "@/lib/domain/achievements";
+import { awardAchievements } from "@/lib/achievements/award";
 import { translateTeam } from "@/lib/i18n/teams";
 import type { QuestionType } from "@/lib/domain/types";
 
@@ -307,22 +307,18 @@ async function refreshUserTotals(
   report: SettleReport,
 ) {
   for (const userId of userIds) {
-    const [{ data: preds }, { data: puzzles }, { data: earned }, { data: memberships }] =
-      await Promise.all([
-        supabase
-          .from("predictions")
-          .select("status, points_earned, odds, settled_at")
-          .eq("user_id", userId)
-          .in("status", ["correct", "incorrect", "void"])
-          .order("settled_at", { ascending: false }),
-        supabase
-          .from("puzzle_attempts")
-          .select("points_earned, is_correct")
-          .eq("user_id", userId)
-          .eq("is_correct", true),
-        supabase.from("user_achievements").select("achievement_key").eq("user_id", userId),
-        supabase.from("league_members").select("league_id, leagues(is_public)").eq("user_id", userId),
-      ]);
+    const [{ data: preds }, { data: puzzles }] = await Promise.all([
+      supabase
+        .from("predictions")
+        .select("status, points_earned")
+        .eq("user_id", userId)
+        .in("status", ["correct", "incorrect", "void"]),
+      supabase
+        .from("puzzle_attempts")
+        .select("points_earned")
+        .eq("user_id", userId)
+        .eq("is_correct", true),
+    ]);
 
     const settled = preds ?? [];
     const correct = settled.filter((p) => p.status === "correct");
@@ -330,15 +326,8 @@ async function refreshUserTotals(
     const predictionPoints = correct.reduce((sum, p) => sum + Number(p.points_earned ?? 0), 0);
     const puzzlePoints = (puzzles ?? []).reduce((sum, a) => sum + Number(a.points_earned ?? 0), 0);
 
-    // Streak reads back from the most recent settled prediction and stops at
-    // the first miss. Voids are skipped rather than counted as either.
-    let streak = 0;
-    for (const p of settled) {
-      if (p.status === "void") continue;
-      if (p.status !== "correct") break;
-      streak += 1;
-    }
-
+    // Recomputed from the rows rather than incremented, so a repeated run
+    // cannot double-count and a total that has drifted repairs itself.
     await supabase
       .from("profiles")
       .update({
@@ -348,34 +337,10 @@ async function refreshUserTotals(
       })
       .eq("id", userId);
 
-    const stats: AchievementStats = {
-      totalPredictions: settled.length,
-      totalCorrect: correct.length,
-      currentStreak: streak,
-      bestOdds: correct.reduce((best, p) => Math.max(best, Number(p.odds)), 0),
-      puzzlesSolved: (puzzles ?? []).length,
-      leaguesJoined: (memberships ?? []).filter((m) => !m.leagues?.is_public).length,
-      bestRank: null,
-    };
-
-    const fresh = newlyEarned(stats, (earned ?? []).map((a) => a.achievement_key));
-    if (!fresh.length) continue;
-
-    await supabase
-      .from("user_achievements")
-      .insert(fresh.map((a) => ({ user_id: userId, achievement_key: a.key })));
-
-    await supabase.from("notifications").insert(
-      fresh.map((a) => ({
-        user_id: userId,
-        type: "achievement" as const,
-        title: `הישג חדש: ${a.title}`,
-        body: a.description,
-        link_url: "/profile",
-      })),
-    );
-
-    report.achievements += fresh.length;
-    report.notifications += fresh.length;
+    // Achievements live in one shared place: the daily challenge and joining a
+    // league award them too, and three copies of this would drift.
+    const granted = await awardAchievements(userId);
+    report.achievements += granted;
+    report.notifications += granted;
   }
 }
