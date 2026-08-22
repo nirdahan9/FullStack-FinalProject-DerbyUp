@@ -55,10 +55,10 @@ describe("§8.1 קומפוננטות", () => {
       expect(screen.getByRole("link")).toHaveAttribute("href", "/games/g1");
     });
 
-    it("2. משחק שבוע מסומן", () => {
+    it("2. בחירת עורך מסומנת", () => {
       render(<GameRow {...base} isFeatured competitionName="פרמייר ליג" />);
 
-      expect(screen.getByText("משחק השבוע")).toBeInTheDocument();
+      expect(screen.getByText("בחירת העורך")).toBeInTheDocument();
       expect(screen.getByText("פרמייר ליג")).toBeInTheDocument();
     });
   });
@@ -85,7 +85,7 @@ describe("§8.1 קומפוננטות", () => {
       expect(screen.getByText("3.6 נק׳")).toBeInTheDocument();
     });
 
-    it("3א. בונוס משחק השבוע מוכפל בנקודות המוצגות", () => {
+    it("3א. בונוס בחירת העורך מוכפל בנקודות המוצגות", () => {
       render(<QuestionCard {...base} bonusPct={50} />);
 
       expect(screen.getByText("בונוס 50%")).toBeInTheDocument();

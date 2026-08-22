@@ -107,7 +107,7 @@ export default async function GamePage({
       {bonusPct > 0 && (
         <p className="flex items-center gap-2 rounded-2xl bg-primary/10 px-4 py-3 text-sm font-bold text-primary">
           <Star className="h-4 w-4 fill-current" />
-          משחק השבוע — בונוס {bonusPct}% על הניקוד
+          בחירת העורך — בונוס {bonusPct}% על הניקוד
         </p>
       )}
 

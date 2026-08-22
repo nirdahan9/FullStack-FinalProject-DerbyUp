@@ -55,7 +55,7 @@ export function GameRow({
             {isFeatured && (
               <span className="flex items-center gap-0.5 font-bold text-primary">
                 <Star className="h-3 w-3 fill-current" />
-                משחק השבוע
+                בחירת העורך
               </span>
             )}
             {competitionName}

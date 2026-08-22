@@ -40,7 +40,7 @@ export function ManualSettle({ leagueId, games }: { leagueId: string; games: Gam
       setGameId("");
       setHome("");
       setAway("");
-      toast.success("התוצאה נרשמה. הניחושים יושבו בהרצה הבאה");
+      toast.success("התוצאה נרשמה. הניחושים יעובדו בהרצה הבאה");
     });
   }
 
@@ -49,17 +49,17 @@ export function ManualSettle({ leagueId, games }: { leagueId: string; games: Gam
       <div className="flex flex-col gap-0.5">
         <h2 className="flex items-center gap-1.5 font-bold">
           <Gavel className="h-4 w-4 text-primary" />
-          יישוב ידני
+          עיבוד ידני
         </h2>
         <p className="text-xs text-muted-foreground">
-          למקרה שספק הנתונים טעה או לא עדכן. התוצאה נרשמת, והיישוב מתבצע
+          למקרה שספק הנתונים טעה או לא עדכן. התוצאה נרשמת, והעיבוד מתבצע
           אוטומטית תוך כ-10 דקות.
         </p>
       </div>
 
       {games.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          אין משחקים שהתחילו וטרם יושבו.
+          אין משחקים שהתחילו וטרם עברו עיבוד.
         </p>
       ) : (
         <>

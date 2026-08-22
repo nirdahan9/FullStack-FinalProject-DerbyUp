@@ -24,7 +24,7 @@ const REJECTION_MESSAGES: Record<string, string> = {
   NO_LEAGUE_FOR_COMPETITION: "אינך חבר בליגה של התחרות הזו",
   INVALID_OUTCOME: "התשובה שנבחרה אינה חוקית",
   NOT_OWNER: "הניחוש אינו שלך",
-  ALREADY_SETTLED: "הניחוש כבר יושב",
+  ALREADY_SETTLED: "הניחוש כבר עבר עיבוד",
   CANCEL_WINDOW_CLOSED: "לא ניתן לבטל — נותרו פחות מ-10 דקות לפתיחה",
 };
 

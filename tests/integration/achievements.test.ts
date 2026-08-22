@@ -111,7 +111,7 @@ describe("הישגים — הענקה בפועל", () => {
     expect(rank).toBeNull();
   });
 
-  it("פתרון האתגר לבדו מזכה, בלי שאף ניחוש יושב", async () => {
+  it("פתרון האתגר לבדו מזכה, בלי שאף ניחוש עבר עיבוד", async () => {
     const user = await world.user("רק אתגר", { signIn: false });
     const puzzle = await world.puzzle(["Someone"]);
     await admin.from("puzzle_attempts").insert({

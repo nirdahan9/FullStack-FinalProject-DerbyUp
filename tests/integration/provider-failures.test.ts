@@ -77,7 +77,7 @@ describe("§7.4 כשל בספק החיצוני", () => {
     expect(await statusOf(id)).toBe("pending");
   });
 
-  it("3. חריגת מכסה (429) — לא מיושב; ההרצה הבאה מצליחה", async () => {
+  it("3. חריגת מכסה (429) — לא מעובד; ההרצה הבאה מצליחה", async () => {
     const { game, id } = await awaitingResult();
 
     fetchFixturesByIds.mockImplementation(() => {

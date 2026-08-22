@@ -7,7 +7,7 @@ import { actionError, type ActionResult } from "./types";
 
 const ADMIN_ERRORS: Record<string, string> = {
   NOT_LEAGUE_ADMIN: "רק מנהל הליגה יכול לעשות זאת",
-  ALREADY_SETTLED: "המשחק כבר יושב",
+  ALREADY_SETTLED: "המשחק כבר עבר עיבוד",
   GAME_NOT_STARTED: "לא ניתן להזין תוצאה למשחק שטרם התחיל",
   INVALID_SCORE: "התוצאה שהוזנה אינה תקינה",
   NOT_AUTHENTICATED: "יש להתחבר תחילה",

@@ -68,7 +68,7 @@ describe("§4.3 מחזור חיים מלא של ניחוש", () => {
     expect(data?.points_earned).toBeNull();
   });
 
-  it("5–8. יישוב כשצדק — correct, נקודות = היחס, סכומי הפרופיל, התראה", async () => {
+  it("5–8. עיבוד כשצדק — correct, נקודות = היחס, סכומי הפרופיל, התראה", async () => {
     const kickoff = new Date(Date.now() - 3 * 3_600_000);
     const game = await world.game(competition, { kickoffAt: kickoff });
     const id = await world.predict(user, game.questions.match_result, {
@@ -101,7 +101,7 @@ describe("§4.3 מחזור חיים מלא של ניחוש", () => {
     expect(notes?.length).toBeGreaterThan(0);
   });
 
-  it("9–10. יישוב כשטעה — incorrect, 0 נקודות, total_points ללא שינוי", async () => {
+  it("9–10. עיבוד כשטעה — incorrect, 0 נקודות, total_points ללא שינוי", async () => {
     const kickoff = new Date(Date.now() - 3 * 3_600_000);
     const game = await world.game(competition, { kickoffAt: kickoff });
     const id = await world.predict(user, game.questions.match_result, {
@@ -123,7 +123,7 @@ describe("§4.3 מחזור חיים מלא של ניחוש", () => {
     expect(Number((await profileOf(user.id)).total_points)).toBe(Number(before.total_points));
   });
 
-  it("§7.1.4 תוצאה מגיעה פעמיים — יישוב פעם אחת בלבד", async () => {
+  it("§7.1.4 תוצאה מגיעה פעמיים — עיבוד פעם אחת בלבד", async () => {
     const kickoff = new Date(Date.now() - 3 * 3_600_000);
     const game = await world.game(competition, { kickoffAt: kickoff });
     await world.predict(user, game.questions.match_result, { outcome: "home", odds: 3.0 });
@@ -160,7 +160,7 @@ describe("§4.3 מחזור חיים מלא של ניחוש", () => {
     expect(Number((await profileOf(user.id)).total_points)).toBe(before);
   });
 
-  it("§7.1.5 משחק ללא תוצאה למרות finished — לא מיושב", async () => {
+  it("§7.1.5 משחק ללא תוצאה למרות finished — לא מעובד", async () => {
     const kickoff = new Date(Date.now() - 3 * 3_600_000);
     const game = await world.game(competition, { kickoffAt: kickoff });
     const id = await world.predict(user, game.questions.match_result, { odds: 2.1 });
@@ -213,7 +213,7 @@ describe("§4.4 ביטול ניחוש", () => {
     expect(again).toBeTruthy();
   });
 
-  it("3–4. ניחוש מבוטל אינו מיושב ואינו נספר בדירוג", async () => {
+  it("3–4. ניחוש מבוטל אינו מעובד ואינו נספר בדירוג", async () => {
     const game = await world.game(competition);
     const id = await world.predict(user, game.questions.match_result, {
       status: "cancelled",

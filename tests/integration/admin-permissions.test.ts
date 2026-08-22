@@ -32,7 +32,7 @@ describe("§5.2 הרשאות אדמין ליגה", () => {
 
   afterAll(() => world.dispose());
 
-  it("1. האדמין מסמן משחק שבוע — מצליח", async () => {
+  it("1. האדמין מסמן בחירת עורך — מצליח", async () => {
     const { error } = await owner.client
       .from("leagues")
       .update({ featured_game_id: game.id, featured_bonus_pct: 25 })
@@ -48,7 +48,7 @@ describe("§5.2 הרשאות אדמין ליגה", () => {
     expect(data?.featured_bonus_pct).toBe(25);
   });
 
-  it("2. חבר רגיל מסמן משחק שבוע — נדחה", async () => {
+  it("2. חבר רגיל מסמן בחירת עורך — נדחה", async () => {
     const another = await world.game(competition);
 
     await member.client
@@ -75,7 +75,7 @@ describe("§5.2 הרשאות אדמין ליגה", () => {
     expect(data?.prizes).toBeNull();
   });
 
-  it("4. חבר רגיל מיישב ידנית — NOT_LEAGUE_ADMIN", async () => {
+  it("4. חבר רגיל מעבד ידנית — NOT_LEAGUE_ADMIN", async () => {
     const started = await world.game(competition, {
       kickoffAt: new Date(Date.now() - 3 * 3_600_000),
     });
@@ -110,7 +110,7 @@ describe("§5.2 הרשאות אדמין ליגה", () => {
     expect(data?.name).toBe("הליגה שלהם");
   });
 
-  it("האדמין מיישב ידנית משחק של הטורניר שלו — מצליח, ומשאיר את היישוב ל-cron", async () => {
+  it("האדמין מעבד ידנית משחק של הטורניר שלו — מצליח, ומשאיר את העיבוד ל-cron", async () => {
     const started = await world.game(competition, {
       kickoffAt: new Date(Date.now() - 3 * 3_600_000),
     });
@@ -136,7 +136,7 @@ describe("§5.2 הרשאות אדמין ליגה", () => {
     expect(data?.settled_at).toBeNull();
   });
 
-  it("האדמין אינו יכול ליישב משחק מטורניר אחר", async () => {
+  it("האדמין אינו יכול לעבד משחק מטורניר אחר", async () => {
     const elsewhere = await world.game(other, {
       kickoffAt: new Date(Date.now() - 3 * 3_600_000),
     });
@@ -150,7 +150,7 @@ describe("§5.2 הרשאות אדמין ליגה", () => {
     expect(error).not.toBeNull();
   });
 
-  it("משחק שטרם התחיל אינו ניתן ליישוב ידני", async () => {
+  it("משחק שטרם התחיל אינו ניתן לעיבוד ידני", async () => {
     const { error } = await owner.client.rpc("settle_game_manually", {
       p_league_id: league,
       p_game_id: game.id,

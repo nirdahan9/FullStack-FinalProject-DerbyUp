@@ -51,7 +51,7 @@ export default function Home() {
           <div className="flex flex-wrap gap-2">
             <Badge>ליגות ארגוניות</Badge>
             <Badge variant="secondary">יחסים אמיתיים</Badge>
-            <Badge variant="outline">יישוב אוטומטי</Badge>
+            <Badge variant="outline">עיבוד אוטומטי</Badge>
           </div>
         </section>
 

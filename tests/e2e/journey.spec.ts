@@ -138,7 +138,7 @@ test("§8.2 המסע המרכזי — מהרשמה עד שני הלוחות", as
       await expect(page.getByText("ממתין").first()).toBeVisible();
     });
 
-    await test.step("11–13. יישוב דרך ה-cron — צדקת, והנקודות הן היחס", async () => {
+    await test.step("11–13. עיבוד דרך ה-cron — צדקת, והנקודות הן היחס", async () => {
       // The score is recorded and the scheduled endpoint is called exactly as
       // pg_cron calls it. The provider has never heard of fixture 9xxxxx, so
       // settlement falls back to the row — the manual-settlement path.

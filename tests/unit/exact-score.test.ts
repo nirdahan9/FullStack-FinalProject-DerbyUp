@@ -95,7 +95,7 @@ describe("תוצאה מדויקת — פגיעה", () => {
   });
 });
 
-describe("תוצאה מדויקת — יישוב", () => {
+describe("תוצאה מדויקת — עיבוד", () => {
   const winner = { selectedOutcome: "home", odds: 2.1 };
 
   it("מנצחת נכונה + תוצאה מדויקת = פי 3", () => {
@@ -133,7 +133,7 @@ describe("תוצאה מדויקת — יישוב", () => {
     expect(result).toEqual({ status: "incorrect", pointsEarned: 0 });
   });
 
-  it("בונוס משחק השבוע והתוצאה המדויקת מוכפלים יחד", () => {
+  it("בונוס בחירת העורך והתוצאה המדויקת מוכפלים יחד", () => {
     // 2.10 × 1.5 = 3.15, ×3 = 9.45
     const result = settlePrediction(
       { ...winner, bonusPct: 50, exactScore: "2-1" },

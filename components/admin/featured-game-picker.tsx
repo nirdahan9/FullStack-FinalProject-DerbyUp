@@ -43,7 +43,7 @@ export function FeaturedGamePicker({
       });
       if (!result.ok) return void toast.error(result.error);
       setGameId(nextGameId ?? "");
-      toast.success(nextGameId ? "משחק השבוע עודכן" : "משחק השבוע בוטל");
+      toast.success(nextGameId ? "בחירת העורך עודכנה" : "בחירת העורך בוטלה");
     });
   }
 
@@ -52,7 +52,7 @@ export function FeaturedGamePicker({
       <div className="flex flex-col gap-0.5">
         <h2 className="flex items-center gap-1.5 font-bold">
           <Star className="h-4 w-4 text-primary" />
-          משחק השבוע
+          בחירת העורך
         </h2>
         <p className="text-xs text-muted-foreground">
           בונוס אחוזי על הניקוד במשחק אחד. חל רק על חברי הליגה הזו.
@@ -73,7 +73,7 @@ export function FeaturedGamePicker({
               onChange={(e) => setGameId(e.target.value)}
               className="h-10 rounded-xl border border-input bg-background px-3 text-sm"
             >
-              <option value="">ללא משחק שבוע</option>
+              <option value="">ללא בחירת עורך</option>
               {games.map((game) => (
                 <option key={game.id} value={game.id}>
                   {translateTeam(game.homeTeam)} — {translateTeam(game.awayTeam)} ·{" "}

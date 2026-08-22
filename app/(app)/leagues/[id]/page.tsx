@@ -182,7 +182,7 @@ export default async function LeaguePage({
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="font-bold">ניהול הליגה</span>
             <span className="truncate text-xs text-muted-foreground">
-              פרסים · משחק השבוע · יישוב ידני
+              פרסים · בחירת העורך · עיבוד ידני
             </span>
           </span>
         </Link>

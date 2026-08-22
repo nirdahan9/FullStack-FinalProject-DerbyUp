@@ -34,7 +34,7 @@ export function LeagueRules({ competitionName }: { competitionName: string }) {
       body: "ניחוש נסגר עם שריקת הפתיחה. אפשר לבטל ולנחש מחדש עד 10 דקות לפני.",
     },
     {
-      title: "משחק השבוע",
+      title: "בחירת העורך",
       body: "מנהל הליגה יכול לסמן משחק עם בונוס אחוזי, שמכפיל את הניקוד על אותו משחק.",
     },
   ];
