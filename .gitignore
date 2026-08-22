@@ -1,11 +1,19 @@
 # ---------------------------------------------------------------
-# docs/ — everything written rather than built:
+# docs/ — everything written rather than built.
+#
 #   docs/*.md            submission documents, handed in separately
 #   docs/assignment/     the course brief
-#   docs/planning/       work plan and scoping decisions, internal only
-# None of it belongs in the repository the lecturer sees.
+#   docs/planning/       ✅ TRACKED — the work plan, the implementation plan
+#                        and the decision log. They record why the product is
+#                        built the way it is, which is exactly what the
+#                        assignment asks to be able to explain.
+#
+# `docs/*` rather than `docs/`: git cannot re-include a path whose parent
+# directory is excluded, so the negation below only works if the directory
+# itself is never matched.
 # ---------------------------------------------------------------
-docs/
+docs/*
+!docs/planning/
 *.docx
 *.doc
 
