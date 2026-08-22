@@ -3,8 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { GameFilters } from "@/components/site-admin/game-filters";
 import { GameStatusBadge } from "@/components/site-admin/game-status-badge";
 import { SettleGameDialog } from "@/components/site-admin/settle-game-dialog";
+import { FixtureLabel, FixtureScore } from "@/components/site-admin/fixture";
 import { Pagination } from "@/components/shared/pagination";
-import { translateTeam } from "@/lib/i18n/teams";
 import { formatDateTime, formatNumber } from "@/lib/format";
 import {
   Table,
@@ -112,9 +112,11 @@ export default async function AdminGamesPage({
                 <TableRow key={g.id}>
                   <TableCell className="max-w-[240px]">
                     <Link href={`/games/${g.id}`} className="flex flex-col hover:underline">
-                      <span className="truncate font-bold" dir="auto">
-                        {translateTeam(g.home_team)} — {translateTeam(g.away_team)}
-                      </span>
+                      <FixtureLabel
+                        home={g.home_team}
+                        away={g.away_team}
+                        className="truncate font-bold"
+                      />
                       <span className="truncate text-[11px] text-muted-foreground">
                         {g.competition_name}
                       </span>
@@ -126,10 +128,8 @@ export default async function AdminGamesPage({
                   <TableCell>
                     <GameStatusBadge status={g.status} settledAt={g.settled_at} />
                   </TableCell>
-                  <TableCell className="whitespace-nowrap font-bold" dir="ltr">
-                    {g.score_home === null || g.score_away === null
-                      ? "—"
-                      : `${g.score_home} : ${g.score_away}`}
+                  <TableCell className="whitespace-nowrap font-bold">
+                    <FixtureScore home={g.score_home} away={g.score_away} />
                   </TableCell>
                   <TableCell className="whitespace-nowrap text-sm">
                     {formatNumber(g.prediction_count)}

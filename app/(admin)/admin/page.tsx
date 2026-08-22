@@ -15,7 +15,7 @@ import { createClient } from "@/lib/supabase/server";
 import { StatCard } from "@/components/site-admin/stat-card";
 import { GameStatusBadge } from "@/components/site-admin/game-status-badge";
 import { SettleGameDialog } from "@/components/site-admin/settle-game-dialog";
-import { translateTeam } from "@/lib/i18n/teams";
+import { FixtureLabel } from "@/components/site-admin/fixture";
 import { formatDateTime, formatNumber, formatPoints } from "@/lib/format";
 
 /**
@@ -193,9 +193,11 @@ export default async function AdminOverviewPage() {
               {(awaiting ?? []).map((g) => (
                 <li key={g.id} className="flex items-center justify-between gap-3 py-2">
                   <span className="flex min-w-0 flex-col">
-                    <span className="truncate text-sm font-bold" dir="auto">
-                      {translateTeam(g.home_team)} — {translateTeam(g.away_team)}
-                    </span>
+                    <FixtureLabel
+                      home={g.home_team}
+                      away={g.away_team}
+                      className="truncate text-sm font-bold"
+                    />
                     <span className="text-[11px] text-muted-foreground">
                       {formatDateTime(g.kickoff_at)} · {formatNumber(g.prediction_count)} ניחושים
                     </span>

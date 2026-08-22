@@ -5,6 +5,7 @@ import { Gavel } from "lucide-react";
 import { toast } from "sonner";
 import { settleGameSiteWide } from "@/lib/actions/site-admin";
 import { translateTeam } from "@/lib/i18n/teams";
+import { FixtureLabel } from "@/components/site-admin/fixture";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -72,12 +73,15 @@ export function SettleGameDialog({
         <DialogHeader>
           <DialogTitle className="text-right">רישום תוצאה</DialogTitle>
           <DialogDescription className="text-right">
-            {translateTeam(homeTeam)} — {translateTeam(awayTeam)}. התוצאה נרשמת,
+            <FixtureLabel home={homeTeam} away={awayTeam} />. התוצאה נרשמת,
             והעיבוד מתבצע אוטומטית תוך כ-10 דקות.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-end gap-2">
+        {/* dir="rtl" pins the home field to the right, the side FixtureLabel
+            puts the home club on. Without it the row would follow whatever
+            direction it inherits. */}
+        <div dir="rtl" className="flex items-end gap-2">
           <div className="flex flex-1 flex-col gap-1.5">
             <Label htmlFor="adminScoreHome" className="truncate text-xs font-bold">
               {translateTeam(homeTeam)}

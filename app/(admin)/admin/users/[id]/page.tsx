@@ -4,7 +4,7 @@ import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { UserActions } from "@/components/site-admin/user-actions";
 import { Badge } from "@/components/ui/badge";
-import { translateTeam } from "@/lib/i18n/teams";
+import { FixtureLabel } from "@/components/site-admin/fixture";
 import { formatDateTime, formatNumber, formatPoints } from "@/lib/format";
 import {
   Table,
@@ -173,9 +173,8 @@ export default async function AdminUserPage({
                       <Link
                         href={`/games/${p.game_id}`}
                         className="truncate text-sm font-bold hover:underline"
-                        dir="auto"
                       >
-                        {translateTeam(p.home_team)} — {translateTeam(p.away_team)}
+                        <FixtureLabel home={p.home_team} away={p.away_team} />
                       </Link>
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
