@@ -3,7 +3,7 @@ import { Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { QuestionCard } from "@/components/games/question-card";
 import { CANCEL_WINDOW_MINUTES } from "@/lib/domain/prediction-rules";
-import { translateTeam } from "@/lib/i18n/teams";
+import { FixtureLabel, FixtureScore } from "@/components/shared/fixture";
 import type { Outcome } from "@/lib/football-api/types";
 
 export default async function GamePage({
@@ -90,17 +90,22 @@ export default async function GamePage({
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <span className="section-label">{game.competitions?.name}</span>
-        <h1 className="text-2xl font-black leading-tight" dir="auto">
-          {translateTeam(game.home_team)} — {translateTeam(game.away_team)}
-        </h1>
+        <FixtureLabel
+          home={game.home_team}
+          away={game.away_team}
+          className="text-2xl font-black leading-tight"
+        />
         <p className="text-sm text-muted-foreground">{kickoffLabel}</p>
       </div>
 
       {game.status === "finished" && game.score_home !== null && (
         <div className="card-kickoff flex items-center justify-center gap-3 py-4">
-          <span className="text-3xl font-black" dir="ltr">
-            {game.score_home} - {game.score_away}
-          </span>
+          <FixtureScore
+            home={game.score_home}
+            away={game.score_away}
+            separator=" - "
+            className="text-3xl font-black"
+          />
         </div>
       )}
 

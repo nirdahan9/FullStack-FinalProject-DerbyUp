@@ -13,6 +13,7 @@ import {
 import { round2 } from "@/lib/domain/scoring";
 import { Button } from "@/components/ui/button";
 import { ScoreDrumPicker } from "@/components/games/score-drum-picker";
+import { ExactScore } from "@/components/shared/fixture";
 
 type Outcome = { key: string; label: string; odds: number };
 
@@ -246,7 +247,8 @@ export function QuestionCard({
 
       {current?.exactScore && (
         <p className="flex items-center gap-1 text-xs font-bold text-amber-500">
-          🎯 ניחשת {current.exactScore} · פגיעה מזכה ב-×{EXACT_SCORE_MULTIPLIER}
+          🎯 ניחשת <ExactScore value={current.exactScore} /> · פגיעה מזכה
+          ב-×{EXACT_SCORE_MULTIPLIER}
         </p>
       )}
 

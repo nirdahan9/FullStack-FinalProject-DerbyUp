@@ -15,7 +15,7 @@ import { createClient } from "@/lib/supabase/server";
 import { StatCard } from "@/components/site-admin/stat-card";
 import { GameStatusBadge } from "@/components/site-admin/game-status-badge";
 import { SettleGameDialog } from "@/components/site-admin/settle-game-dialog";
-import { FixtureLabel } from "@/components/site-admin/fixture";
+import { FixtureLabel } from "@/components/shared/fixture";
 import { formatDateTime, formatNumber, formatPoints } from "@/lib/format";
 
 /**

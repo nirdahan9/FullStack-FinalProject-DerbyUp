@@ -20,6 +20,18 @@ import { Trophy } from "lucide-react";
  * product makes, not decoration.
  */
 
+/**
+ * Everything the render put on screen, as one string.
+ *
+ * A score is drawn as isolated digits — <bdi>2</bdi>-<bdi>1</bdi> — so the
+ * bidi algorithm cannot fuse and reorder it, which means no single element
+ * holds the text "2-1" any more. The concatenation is what a reader and a
+ * screen reader both get, so it is what these assert on.
+ */
+function renderedText() {
+  return document.body.textContent ?? "";
+}
+
 // Server actions cannot run in jsdom; the point of these cases is what the
 // component renders and which action it reaches for, not what the action does.
 const makePrediction = vi.hoisted(() => vi.fn());
@@ -113,7 +125,7 @@ describe("§8.1 קומפוננטות", () => {
         />,
       );
 
-      expect(screen.getByText(/ניחשת 2-1/)).toBeInTheDocument();
+      expect(renderedText()).toContain("ניחשת 2-1");
       expect(screen.getByText(/×3/)).toBeInTheDocument();
     });
 

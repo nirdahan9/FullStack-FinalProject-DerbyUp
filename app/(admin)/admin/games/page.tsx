@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { GameFilters } from "@/components/site-admin/game-filters";
 import { GameStatusBadge } from "@/components/site-admin/game-status-badge";
 import { SettleGameDialog } from "@/components/site-admin/settle-game-dialog";
-import { FixtureLabel, FixtureScore } from "@/components/site-admin/fixture";
+import { FixtureLabel, FixtureScore } from "@/components/shared/fixture";
 import { Pagination } from "@/components/shared/pagination";
 import { formatDateTime, formatNumber } from "@/lib/format";
 import {

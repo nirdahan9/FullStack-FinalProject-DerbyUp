@@ -5,7 +5,7 @@ import { Gavel } from "lucide-react";
 import { toast } from "sonner";
 import { settleGameSiteWide } from "@/lib/actions/site-admin";
 import { translateTeam } from "@/lib/i18n/teams";
-import { FixtureLabel } from "@/components/site-admin/fixture";
+import { FixtureLabel } from "@/components/shared/fixture";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

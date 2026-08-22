@@ -4,7 +4,7 @@ import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { UserActions } from "@/components/site-admin/user-actions";
 import { Badge } from "@/components/ui/badge";
-import { FixtureLabel } from "@/components/site-admin/fixture";
+import { FixtureLabel } from "@/components/shared/fixture";
 import { formatDateTime, formatNumber, formatPoints } from "@/lib/format";
 import {
   Table,

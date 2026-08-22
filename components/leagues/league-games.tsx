@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { translateTeam } from "@/lib/i18n/teams";
+import { FixtureScore } from "@/components/shared/fixture";
 
 export type LeagueGame = {
   id: string;
@@ -118,23 +119,32 @@ export function LeagueGames({
                 />
 
                 <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="flex items-center gap-1.5 truncate text-sm font-bold" dir="auto">
+                  {/* dir="rtl" rather than "auto": the crests make this a flex
+                      row, so the direction decides which club sits on the
+                      right, and "auto" would decide it from the first letter
+                      of whichever club happens to be at home. */}
+                  <span dir="rtl" className="flex items-center gap-1.5 truncate text-sm font-bold">
                     {game.homeLogo && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={game.homeLogo} alt="" className="h-4 w-4 shrink-0 object-contain" />
                     )}
-                    <span className="truncate">{translateTeam(game.homeTeam)}</span>
+                    <bdi className="truncate">{translateTeam(game.homeTeam)}</bdi>
                     <span className="shrink-0 text-muted-foreground">נגד</span>
                     {game.awayLogo && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={game.awayLogo} alt="" className="h-4 w-4 shrink-0 object-contain" />
                     )}
-                    <span className="truncate">{translateTeam(game.awayTeam)}</span>
+                    <bdi className="truncate">{translateTeam(game.awayTeam)}</bdi>
                   </span>
                   <span className="text-[11px] text-muted-foreground">
-                    {game.status === "finished" && game.scoreHome !== null
-                      ? `הסתיים ${game.scoreHome}-${game.scoreAway}`
-                      : when}
+                    {game.status === "finished" && game.scoreHome !== null ? (
+                      <>
+                        הסתיים{" "}
+                        <FixtureScore home={game.scoreHome} away={game.scoreAway} separator="-" />
+                      </>
+                    ) : (
+                      when
+                    )}
                   </span>
                 </div>
 

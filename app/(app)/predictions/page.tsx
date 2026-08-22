@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Target } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { translateTeam } from "@/lib/i18n/teams";
+import { ExactScore, FixtureLabel } from "@/components/shared/fixture";
 import { isExactScoreHit } from "@/lib/domain/exact-score";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Pagination } from "@/components/shared/pagination";
@@ -76,9 +76,15 @@ export default async function PredictionsPage({
               return (
                 <div key={p.id} className="card-kickoff flex items-center gap-3 py-3">
                   <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <span className="truncate text-sm font-bold" dir="auto">
-                      {game ? `${translateTeam(game.home_team)} — ${translateTeam(game.away_team)}` : "משחק"}
-                    </span>
+                    {game ? (
+                      <FixtureLabel
+                        home={game.home_team}
+                        away={game.away_team}
+                        className="truncate text-sm font-bold"
+                      />
+                    ) : (
+                      <span className="truncate text-sm font-bold">משחק</span>
+                    )}
                     <span className="truncate text-xs text-muted-foreground">
                       {OUTCOME_LABELS[p.selected_outcome] ?? p.selected_outcome}
                       {" · "}
@@ -93,7 +99,7 @@ export default async function PredictionsPage({
                           isExactHit ? "text-amber-500" : "text-muted-foreground"
                         }`}
                       >
-                        🎯 {p.exact_score}
+                        🎯 <ExactScore value={p.exact_score} />
                         {p.status === "pending"
                           ? " · פגיעה מזכה ב-×3"
                           : isExactHit
