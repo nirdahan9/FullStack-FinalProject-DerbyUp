@@ -95,7 +95,10 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-in-up": "fade-in-up 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards",
+        // `both`, not `forwards`: the landing page staggers these with an
+        // animationDelay, and without a backwards fill each element would
+        // paint at full opacity and then blink out when its turn arrived.
+        "fade-in-up": "fade-in-up 0.4s cubic-bezier(0.32, 0.72, 0, 1) both",
       },
     },
   },

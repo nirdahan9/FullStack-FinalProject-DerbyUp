@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Heebo } from "next/font/google";
 import { ThemeProvider } from "@/components/layout/theme-provider";
+import { ThemeColorScript } from "@/components/layout/theme-color-script";
 import "./globals.css";
 
 // Same family the DerbyUp app loads from Google Fonts, self-hosted by next/font
@@ -51,6 +52,10 @@ export default function RootLayout({
   return (
     <html lang="he" dir="rtl" suppressHydrationWarning>
       <body className={`${heebo.variable} font-heebo antialiased`}>
+        {/* First child of <body> so the colour theme is on <html> before the
+            browser paints. See the component for why it cannot come from the
+            server. */}
+        <ThemeColorScript />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

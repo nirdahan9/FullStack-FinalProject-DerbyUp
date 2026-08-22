@@ -118,6 +118,18 @@
   [role="button"] {
     touch-action: manipulation;
   }
+
+  /* The landing page stages its entrance with `animate-fade-in-up` and a
+     per-element delay. That fill mode is `both`, so an element is invisible
+     until its turn comes — which for someone who has asked the system to stop
+     animating is a page that is blank and then is not. Neutralised rather
+     than shortened: the animation is decoration, and the content underneath
+     it is the page. */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-fade-in-up {
+      animation: none;
+    }
+  }
 }
 
 @layer utilities {
@@ -144,4 +156,359 @@
   .pb-safe {
     padding-bottom: calc(4rem + env(safe-area-inset-bottom));
   }
+}
+
+/* ─── ערכות צבע · Colour themes ────────────────────────────────────────────
+   Ported from the DerbyUp app (bet-joy-league-hub/src/index.css). The original
+   named its themes after national sides; here they carry the clubs and squads
+   they actually depict. The colour values themselves are unchanged.
+
+   Two selector forms per theme, on purpose:
+
+   • `.theme-x` / `.dark.theme-x` — the class sits on <html>, next to the
+     `dark` class next-themes writes there, so the compound form is what
+     themes the page.
+   • `.dark .theme-x` — the descendant form themes a nested subtree. That is
+     what lets the picker paint each swatch with plain `bg-primary`, instead
+     of restating all twenty-two hex values a second time in TypeScript.
+
+   Unlayered and last in the file: `:root` and `.dark` sit in Tailwind's base
+   layer, so at equal specificity source order decides, and these win.
+*/
+
+/* Used by the picker swatch only — when this theme is active no class is set
+   at all, so it just has to restate the base accent for a nested swatch. */
+.theme-default,
+.dark .theme-default,
+.dark.theme-default {
+  --primary: 122 39% 49%;
+  --accent: 122 39% 49%;
+  --ring: 122 39% 49%;
+}
+
+/* אינטר מיאמי — פטל · Inter Miami (Brand Berry #E30B5C) */
+.theme-inter-miami {
+  --primary: 337 91% 47%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 337 91% 47%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 337 91% 47%;
+  --background: 337 45% 96.5%;
+  --card: 337 60% 99%;
+  --border: 337 35% 91%;
+  --input: 337 35% 91%;
+  --secondary: 337 45% 94%;
+  --secondary-foreground: 337 91% 40%;
+  --muted: 337 45% 94%;
+  --muted-foreground: 337 20% 40%;
+}
+
+.dark .theme-inter-miami,
+.dark.theme-inter-miami {
+  --primary: 337 91% 47%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 337 91% 47%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 337 91% 47%;
+  --background: 315 23% 13%;
+  --card: 315 23% 18%;
+  --border: 315 23% 22%;
+  --input: 315 23% 22%;
+  /* Not in the original, which guarded the light block with `html:not(.dark)`
+     instead. Restating the four here is the same fix without a guard that the
+     nested-swatch selector would have to duplicate. */
+  --secondary: 315 23% 22%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 315 23% 22%;
+  --muted-foreground: 315 15% 65%;
+}
+
+/* מכבי תל אביב — כחול וצהוב · Maccabi Tel Aviv (navy #13245F, gold #FFC72C) */
+.theme-maccabi-ta {
+  --primary: 227 67% 22%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 227 67% 22%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 227 67% 22%;
+  --background: 44 100% 97%;
+  --card: 0 0% 100%;
+  --border: 227 30% 85%;
+}
+
+.dark .theme-maccabi-ta,
+.dark.theme-maccabi-ta {
+  --primary: 44 100% 59%;
+  --primary-foreground: 240 10% 5%;
+  --accent: 44 100% 59%;
+  --accent-foreground: 240 10% 5%;
+  --ring: 44 100% 59%;
+  --background: 227 67% 12%;
+  --card: 227 67% 18%;
+  --border: 227 45% 26%;
+  --input: 227 45% 26%;
+}
+
+/* הפועל תל אביב — אדום ולבן · Hapoel Tel Aviv */
+.theme-hapoel-ta {
+  --primary: 358 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 358 100% 50%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 358 100% 50%;
+  --background: 0 0% 100%;
+  --card: 0 0% 96%;
+  --border: 0 0% 90%;
+}
+
+.dark .theme-hapoel-ta,
+.dark.theme-hapoel-ta {
+  --primary: 358 100% 55%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 358 100% 55%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 358 100% 55%;
+  --background: 0 0% 5%;
+  --card: 0 0% 11%;
+  --border: 0 0% 16%;
+  --input: 0 0% 16%;
+}
+
+/* בית״ר ירושלים — צהוב ושחור · Beitar Jerusalem */
+.theme-beitar {
+  --primary: 48 100% 50%;
+  --primary-foreground: 240 10% 5%;
+  --accent: 0 0% 10%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 48 100% 50%;
+  --background: 0 0% 100%;
+  --card: 0 0% 96%;
+  --border: 0 0% 90%;
+}
+
+.dark .theme-beitar,
+.dark.theme-beitar {
+  --primary: 48 100% 50%;
+  --primary-foreground: 240 10% 5%;
+  --accent: 0 0% 95%;
+  --accent-foreground: 240 10% 5%;
+  --ring: 48 100% 50%;
+  --background: 0 0% 5%;
+  --card: 0 0% 11%;
+  --border: 0 0% 16%;
+  --input: 0 0% 16%;
+}
+
+/* נבחרת ספרד — ארגמן וזהב · Spain (#C10E23, #F1BF00) */
+.theme-spain {
+  --primary: 353 86% 41%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 48 100% 47%;
+  --accent-foreground: 240 10% 5%;
+  --ring: 353 86% 41%;
+  --background: 48 100% 98%;
+  --card: 0 0% 100%;
+  --border: 48 40% 90%;
+}
+
+.dark .theme-spain,
+.dark.theme-spain {
+  --primary: 353 86% 50%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 48 100% 50%;
+  --accent-foreground: 240 10% 5%;
+  --ring: 353 86% 50%;
+  --background: 353 60% 8%;
+  --card: 353 45% 12%;
+  --border: 353 35% 18%;
+  --input: 353 35% 18%;
+}
+
+/* נבחרת ברזיל — ירוק וצהוב · Brazil (#009B3A, #FEDD00) */
+.theme-brazil {
+  --primary: 142 100% 30%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 52 100% 50%;
+  --accent-foreground: 240 10% 5%;
+  --ring: 142 100% 30%;
+  --background: 52 100% 98%;
+  --card: 0 0% 100%;
+  --border: 142 30% 90%;
+}
+
+.dark .theme-brazil,
+.dark.theme-brazil {
+  --primary: 52 100% 50%;
+  --primary-foreground: 240 10% 5%;
+  --accent: 142 100% 35%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 52 100% 50%;
+  --background: 142 80% 6%;
+  --card: 142 60% 10%;
+  --border: 142 45% 15%;
+  --input: 142 45% 15%;
+}
+
+/* אינטר — כחול · Inter (royal blue #002395, red #ED2939) */
+.theme-inter {
+  --primary: 226 100% 29%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 355 84% 54%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 226 100% 29%;
+  --background: 0 0% 100%;
+  --card: 226 40% 97%;
+  --border: 226 30% 90%;
+}
+
+.dark .theme-inter,
+.dark.theme-inter {
+  --primary: 226 100% 55%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 355 84% 54%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 226 100% 55%;
+  --background: 226 60% 8%;
+  --card: 226 30% 12%;
+  /* The original left this at `0 0% 90%` — a near-white hairline around every
+     card in dark mode. Corrected to sit with the rest of the palette. */
+  --border: 226 30% 20%;
+  --input: 226 30% 18%;
+}
+
+/* ישראל — תכלת ולבן · Israel */
+.theme-israel {
+  --primary: 209 60% 66%;
+  --primary-foreground: 240 10% 5%;
+  --accent: 39 92% 55%;
+  --accent-foreground: 240 10% 5%;
+  --ring: 209 60% 66%;
+  --background: 0 0% 100%;
+  --card: 209 40% 97%;
+  --border: 209 30% 90%;
+}
+
+.dark .theme-israel,
+.dark.theme-israel {
+  --primary: 209 60% 66%;
+  --primary-foreground: 240 10% 5%;
+  --accent: 39 92% 55%;
+  --accent-foreground: 240 10% 5%;
+  --ring: 209 60% 66%;
+  --background: 209 60% 7%;
+  --card: 209 45% 11%;
+  --border: 209 35% 16%;
+  --input: 209 35% 16%;
+}
+
+/* ליברפול — אדום · Liverpool (#CE1126) */
+.theme-liverpool {
+  --primary: 353 85% 44%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 353 85% 44%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 353 85% 44%;
+  --background: 0 0% 100%;
+  --card: 0 0% 96%;
+  --border: 0 0% 90%;
+}
+
+.dark .theme-liverpool,
+.dark.theme-liverpool {
+  --primary: 353 85% 55%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 353 85% 55%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 353 85% 55%;
+  --background: 353 40% 6%;
+  --card: 353 25% 11%;
+  --border: 353 20% 16%;
+  --input: 353 20% 16%;
+}
+
+/* דורטמונד — שחור וצהוב · Dortmund (black, gold #FFCC00, red #DD0000) */
+.theme-dortmund {
+  --primary: 0 0% 0%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 0 100% 43%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 0 0% 0%;
+  --background: 48 100% 97%;
+  --card: 0 0% 100%;
+  --border: 0 100% 90%;
+}
+
+.dark .theme-dortmund,
+.dark.theme-dortmund {
+  --primary: 48 100% 50%;
+  --primary-foreground: 240 10% 5%;
+  --accent: 0 100% 45%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 48 100% 50%;
+  --background: 0 0% 5%;
+  --card: 0 0% 11%;
+  --border: 0 0% 16%;
+  --input: 0 0% 16%;
+}
+
+/* נבחרת אורוגוואי — טורקיז · Uruguay (#02BC9A) */
+.theme-uruguay {
+  --primary: 169 98% 37%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 169 98% 37%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 169 98% 37%;
+  --background: 169 45% 92%;
+  --card: 169 60% 98%;
+  --card-foreground: 240 10% 10%;
+  --border: 169 35% 82%;
+  --input: 169 35% 82%;
+  --secondary: 169 45% 88%;
+  --secondary-foreground: 169 85% 20%;
+  --muted: 169 45% 88%;
+  --muted-foreground: 169 30% 35%;
+}
+
+.dark .theme-uruguay,
+.dark.theme-uruguay {
+  --primary: 169 98% 37%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 169 98% 37%;
+  --accent-foreground: 0 0% 100%;
+  --ring: 169 98% 37%;
+  --background: 169 80% 5%;
+  --card: 169 60% 9%;
+  --card-foreground: 169 10% 98%;
+  --border: 169 40% 16%;
+  --input: 169 40% 16%;
+  --secondary: 169 45% 13%;
+  --secondary-foreground: 169 98% 37%;
+  --muted: 169 45% 13%;
+  --muted-foreground: 169 25% 70%;
+}
+
+/* Two themes carry a tinted, gradient card in the original rather than the
+   flat `card-kickoff`. Scoped to <html> only — the picker swatches never use
+   `.card-kickoff`, so the nested form is not needed here. */
+html.theme-inter-miami:not(.dark) .card-kickoff {
+  border: 1.5px solid hsl(337 35% 91%);
+  background: linear-gradient(135deg, hsl(337 60% 99%) 0%, hsl(337 45% 95%) 100%);
+  box-shadow:
+    0 8px 30px -4px rgba(227, 11, 92, 0.08),
+    0 4px 12px -2px rgba(227, 11, 92, 0.04);
+}
+
+html.theme-uruguay:not(.dark) .card-kickoff {
+  border: 1.5px solid hsl(169 35% 82%);
+  background: linear-gradient(135deg, hsl(169 60% 98%) 0%, hsl(169 40% 93%) 100%);
+  box-shadow:
+    0 8px 30px -4px rgba(2, 188, 154, 0.08),
+    0 4px 12px -2px rgba(2, 188, 154, 0.04);
+}
+
+html.dark.theme-uruguay .card-kickoff {
+  border: 1.5px solid hsl(169 40% 16%);
+  background: linear-gradient(135deg, hsl(169 60% 9%) 0%, hsl(169 70% 6%) 100%);
+  box-shadow:
+    0 8px 30px -4px rgba(2, 188, 154, 0.03),
+    0 4px 12px -2px rgba(2, 188, 154, 0.02);
 }

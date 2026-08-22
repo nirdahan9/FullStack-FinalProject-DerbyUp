@@ -2,6 +2,7 @@ import { Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/layout/sign-out-button";
 import { EditNameForm } from "@/components/layout/edit-name-form";
+import { ThemeColorPicker } from "@/components/layout/theme-color-picker";
 import { ACHIEVEMENTS } from "@/lib/domain/achievements";
 
 export default async function ProfilePage() {
@@ -105,6 +106,8 @@ export default async function ProfilePage() {
           </div>
         ))}
       </dl>
+
+      <ThemeColorPicker />
 
       <SignOutButton />
     </div>
