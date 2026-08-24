@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
-import { translateTeam } from "@/lib/i18n/teams";
 import { Button } from "@/components/ui/button";
+import { FixtureLabel } from "@/components/shared/fixture";
 import {
   Sheet,
   SheetContent,
@@ -29,11 +29,15 @@ export function AdvisorSheet({
   gameId,
   homeTeam,
   awayTeam,
+  homeLogo,
+  awayLogo,
 }: {
   gameId: string;
   /** Provider spelling, as the rest of the page passes it. Translated here. */
   homeTeam: string;
   awayTeam: string;
+  homeLogo?: string | null;
+  awayLogo?: string | null;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -51,8 +55,14 @@ export function AdvisorSheet({
         className="flex max-h-[88dvh] flex-col gap-0 overflow-y-auto rounded-t-3xl"
       >
         <SheetHeader className="text-start">
-          <SheetTitle dir="auto">
-            {translateTeam(homeTeam)} — {translateTeam(awayTeam)}
+          <SheetTitle>
+            <FixtureLabel
+              home={homeTeam}
+              away={awayTeam}
+              homeLogo={homeLogo}
+              awayLogo={awayLogo}
+              crestClassName="h-6 w-6"
+            />
           </SheetTitle>
           <SheetDescription>
             יועץ ה-AI עונה על המשחק הזה ועל כללי הניקוד של DerbyUp.

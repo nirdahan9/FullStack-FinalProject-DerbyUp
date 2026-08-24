@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft, Sparkles } from "lucide-react";
 import type { DailyPick } from "@/lib/advisor/daily-pick";
+import { FixtureLabel } from "@/components/shared/fixture";
 
 const TYPE_LABEL: Record<string, string> = {
   match_result: "מי ינצח?",
@@ -38,9 +39,15 @@ export function DailyPickCard({ pick }: { pick: DailyPick }) {
       </div>
 
       <div>
-        <p className="text-sm font-black" dir="auto">
-          {pick.homeTeam} — {pick.awayTeam}
-        </p>
+        {/* Names arrive already translated; translateTeam passes them through. */}
+        <FixtureLabel
+          home={pick.homeTeam}
+          away={pick.awayTeam}
+          homeLogo={pick.homeLogo}
+          awayLogo={pick.awayLogo}
+          crestClassName="h-5 w-5"
+          className="block text-sm font-black"
+        />
         <p className="text-xs text-muted-foreground">
           {pick.competitionName} · {kickoff}
         </p>

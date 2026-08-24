@@ -1,5 +1,6 @@
 import { Sparkles } from "lucide-react";
 import type { LandingAdvisorCard } from "@/lib/advisor/daily-pick";
+import { FixtureLabel } from "@/components/shared/fixture";
 
 const TYPE_LABEL: Record<string, string> = {
   match_result: "מי ינצח?",
@@ -44,9 +45,14 @@ export function AdvisorPreview({ card }: { card: LandingAdvisorCard }) {
             </span>
           </div>
 
-          <p className="text-sm font-black" dir="auto">
-            {card.homeTeam} — {card.awayTeam}
-          </p>
+          <FixtureLabel
+            home={card.homeTeam}
+            away={card.awayTeam}
+            homeLogo={card.homeLogo}
+            awayLogo={card.awayLogo}
+            crestClassName="h-6 w-6"
+            className="block text-sm font-black"
+          />
 
           <p className="text-base font-bold leading-snug" dir="auto">
             {card.insight.headline}

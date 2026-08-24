@@ -109,6 +109,9 @@ export default async function GamePage({
         <FixtureLabel
           home={game.home_team}
           away={game.away_team}
+          homeLogo={game.home_logo}
+          awayLogo={game.away_logo}
+          crestClassName="h-7 w-7"
           className="text-2xl font-black leading-tight"
         />
         <p className="text-sm text-muted-foreground">{kickoffLabel}</p>
@@ -146,6 +149,8 @@ export default async function GamePage({
           gameId={game.id}
           homeTeam={game.home_team}
           awayTeam={game.away_team}
+          homeLogo={game.home_logo}
+          awayLogo={game.away_logo}
         />
       )}
 

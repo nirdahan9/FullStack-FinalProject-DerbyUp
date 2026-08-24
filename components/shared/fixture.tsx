@@ -26,17 +26,55 @@ import { parseExactScore } from "@/lib/domain/exact-score";
 export function FixtureLabel({
   home,
   away,
+  homeLogo,
+  awayLogo,
   separator = "—",
   className = "",
+  crestClassName = "h-5 w-5",
 }: {
   home: string;
   away: string;
+  /** Crests flank the pair when given — home's on the outside of its name. */
+  homeLogo?: string | null;
+  awayLogo?: string | null;
   separator?: string;
   className?: string;
+  crestClassName?: string;
 }) {
+  // The no-crest markup is kept verbatim rather than unified: six pages
+  // render through this branch, and none of them should change because two
+  // optional props were added for the advisor.
+  if (!homeLogo && !awayLogo) {
+    return (
+      <span dir="rtl" className={className}>
+        <bdi>{translateTeam(home)}</bdi> {separator} <bdi>{translateTeam(away)}</bdi>
+      </span>
+    );
+  }
+
+  // Each crest is grouped with its own name in an inline-flex island, so a
+  // long pair can still wrap between the teams — never between a club and its
+  // badge. The outer span stays inline for exactly that reason: making it a
+  // flex row would trade wrapping for overflow on narrow screens.
   return (
     <span dir="rtl" className={className}>
-      <bdi>{translateTeam(home)}</bdi> {separator} <bdi>{translateTeam(away)}</bdi>
+      <span className="inline-flex items-center gap-2 align-middle">
+        {homeLogo && (
+          // Provider-CDN crests at icon size; same reasoning as GameRow —
+          // next/image would mean allow-listing a remote host for no gain.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={homeLogo} alt="" className={`shrink-0 object-contain ${crestClassName}`} />
+        )}
+        <bdi>{translateTeam(home)}</bdi>
+      </span>{" "}
+      {separator}{" "}
+      <span className="inline-flex items-center gap-2 align-middle">
+        <bdi>{translateTeam(away)}</bdi>
+        {awayLogo && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={awayLogo} alt="" className={`shrink-0 object-contain ${crestClassName}`} />
+        )}
+      </span>
     </span>
   );
 }

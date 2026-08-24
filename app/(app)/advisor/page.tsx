@@ -9,6 +9,7 @@ import {
 import { AdvisorFilters } from "@/components/advisor/advisor-filters";
 import { AdvisorPanel } from "@/components/advisor/advisor-panel";
 import { EmptyState } from "@/components/shared/empty-state";
+import { FixtureLabel } from "@/components/shared/fixture";
 
 const LIST_LIMIT = 40;
 
@@ -63,9 +64,14 @@ export default async function AdvisorPage({
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <span className="section-label">{selected.competition}</span>
-              <p className="truncate text-lg font-black" dir="auto">
-                {selected.homeTeam} — {selected.awayTeam}
-              </p>
+              <FixtureLabel
+                home={selected.homeTeam}
+                away={selected.awayTeam}
+                homeLogo={selected.homeLogo}
+                awayLogo={selected.awayLogo}
+                crestClassName="h-6 w-6"
+                className="block text-lg font-black"
+              />
               <p className="text-xs text-muted-foreground">{selected.kickoffLabel}</p>
             </div>
             <Link
@@ -113,10 +119,23 @@ export default async function AdvisorPage({
                     : "border-border bg-card hover:border-primary/40"
                 }`}
               >
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-bold" dir="auto">
-                    {game.homeTeam} — {game.awayTeam}
-                  </p>
+                <div className="flex min-w-0 flex-1 flex-col gap-1">
+                  {[
+                    { name: game.homeTeam, logo: game.homeLogo },
+                    { name: game.awayTeam, logo: game.awayLogo },
+                  ].map((team) => (
+                    <span key={team.name} className="flex items-center gap-2">
+                      {/* Provider-CDN crests at 16px; same call as GameRow —
+                          next/image buys nothing at this size. */}
+                      {team.logo && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={team.logo} alt="" className="h-4 w-4 shrink-0 object-contain" />
+                      )}
+                      <span className="truncate text-sm font-bold" dir="auto">
+                        {team.name}
+                      </span>
+                    </span>
+                  ))}
                   <p className="text-xs text-muted-foreground">
                     {game.competition} · {game.kickoffLabel}
                   </p>
