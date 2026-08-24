@@ -86,3 +86,16 @@ export const adminSettleSchema = z.object({
 export const adminUserSchema = z.object({
   userId: z.string().uuid("מזהה משתמש לא תקין"),
 });
+
+/**
+ * The AI advisor.
+ *
+ * Length is bounded here and again in lib/advisor/guard.ts, which is not
+ * duplication: this one rejects a malformed *call*, and the guard rejects a
+ * hostile *question*. The guard also normalises whitespace before measuring,
+ * so a question padded to 300 spaces fails here and an empty one fails there.
+ */
+export const askAdvisorSchema = z.object({
+  gameId: z.string().uuid("מזהה משחק לא תקין"),
+  question: z.string().min(1, "יש להזין שאלה").max(300, "השאלה ארוכה מדי"),
+});

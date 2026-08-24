@@ -2,19 +2,25 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Gamepad2, Globe, Home, Trophy } from "lucide-react";
+import { CalendarDays, Gamepad2, Globe, Home, Sparkles, Trophy } from "lucide-react";
 
 const TABS = [
   { href: "/dashboard", icon: Home, label: "בית" },
   { href: "/games", icon: CalendarDays, label: "משחקים" },
+  { href: "/advisor", icon: Sparkles, label: "יועץ" },
   { href: "/leagues", icon: Trophy, label: "ליגות" },
   { href: "/leaderboard", icon: Globe, label: "דירוג" },
   { href: "/challenge", icon: Gamepad2, label: "אתגרים" },
 ] as const;
 
 /**
- * The three-tab bar from the DerbyUp app. Client-side only because the active
- * tab depends on the current path.
+ * The tab bar from the DerbyUp app. Client-side only because the active tab
+ * depends on the current path.
+ *
+ * Six entries rather than five since the advisor arrived. The labels drop to
+ * 10px and the icons to 20 at the narrowest widths, which keeps every tap
+ * target above 44px on a 360px screen — the point at which a sixth tab would
+ * have had to displace one of the others instead.
  */
 export function BottomTabBar() {
   const pathname = usePathname();
@@ -31,12 +37,15 @@ export function BottomTabBar() {
               key={href}
               href={href}
               aria-current={isActive ? "page" : undefined}
-              className={`flex h-full flex-1 flex-col items-center justify-center gap-0.5 transition-colors duration-200 ${
+              className={`flex h-full min-w-0 flex-1 flex-col items-center justify-center gap-0.5 transition-colors duration-200 ${
                 isActive ? "text-primary" : "text-muted-foreground"
               }`}
             >
-              <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[11px] font-medium">{label}</span>
+              <Icon
+                className="h-5 w-5 sm:h-[22px] sm:w-[22px]"
+                strokeWidth={isActive ? 2.5 : 2}
+              />
+              <span className="text-[10px] font-medium sm:text-[11px]">{label}</span>
             </Link>
           );
         })}

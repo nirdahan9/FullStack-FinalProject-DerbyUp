@@ -1,4 +1,5 @@
 import { getLandingFixtures } from "@/lib/landing/fixtures";
+import { getLandingAdvisorCard } from "@/lib/advisor/daily-pick";
 import { LiveRefresher } from "@/components/shared/live-refresher";
 import { Faq } from "@/components/landing/faq";
 import { FeatureGrid } from "@/components/landing/feature-grid";
@@ -8,6 +9,7 @@ import { HowItWorks } from "@/components/landing/how-it-works";
 import { LandingFooter } from "@/components/landing/landing-footer";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { ScoringModel } from "@/components/landing/scoring-model";
+import { AdvisorPreview } from "@/components/landing/advisor-preview";
 
 /**
  * The landing page — the only route an anonymous visitor sees, and the one
@@ -23,7 +25,12 @@ import { ScoringModel } from "@/components/landing/scoring-model";
  * lib/landing/upcoming-games.ts.
  */
 export default async function Home() {
-  const games = await getLandingFixtures();
+  // Both are optional and both swallow their own failures: this page has to
+  // render for a stranger even when the database does not answer.
+  const [games, advisorCard] = await Promise.all([
+    getLandingFixtures(),
+    getLandingAdvisorCard(),
+  ]);
   const hasLiveGame = games.some((game) => game.status === "live");
 
   return (
@@ -34,6 +41,7 @@ export default async function Home() {
         <Hero games={games} />
         <HowItWorks />
         <ScoringModel />
+        {advisorCard && <AdvisorPreview card={advisorCard} />}
         <FeatureGrid />
         <Faq />
         <FinalCta />

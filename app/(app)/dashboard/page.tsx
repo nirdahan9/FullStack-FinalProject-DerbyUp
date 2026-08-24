@@ -3,6 +3,8 @@ import { CalendarDays, Target, Trophy } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { GameRow } from "@/components/games/game-row";
 import { EmptyState } from "@/components/shared/empty-state";
+import { DailyPickCard } from "@/components/advisor/daily-pick-card";
+import { getDailyPickForUser } from "@/lib/advisor/daily-pick";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -21,6 +23,8 @@ export default async function DashboardPage() {
       .select("leagues(id, name, competition_id, featured_game_id, competitions(name))")
       .eq("user_id", user!.id),
   ]);
+
+  const dailyPick = await getDailyPickForUser(user!.id);
 
   const leagues = (memberships ?? []).flatMap((m) => (m.leagues ? [m.leagues] : []));
   const competitionIds = [...new Set(leagues.map((l) => l.competition_id))];
@@ -85,6 +89,8 @@ export default async function DashboardPage() {
         />
       ) : (
         <>
+          {dailyPick && <DailyPickCard pick={dailyPick} />}
+
           <section className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <span className="section-label">🏆 הליגות שלי</span>

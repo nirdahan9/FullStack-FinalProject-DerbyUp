@@ -39,6 +39,201 @@ export type Database = {
   }
   public: {
     Tables: {
+      advisor_conversations: {
+        Row: {
+          created_at: string
+          game_id: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          game_id: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          game_id?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advisor_conversations_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advisor_conversations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      advisor_daily_pick: {
+        Row: {
+          competition_id: number
+          created_at: string
+          game_id: string
+          id: string
+          payload: Json
+          pick_date: string
+        }
+        Insert: {
+          competition_id: number
+          created_at?: string
+          game_id: string
+          id?: string
+          payload: Json
+          pick_date: string
+        }
+        Update: {
+          competition_id?: number
+          created_at?: string
+          game_id?: string
+          id?: string
+          payload?: Json
+          pick_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advisor_daily_pick_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advisor_daily_pick_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      advisor_insights: {
+        Row: {
+          context_hash: string
+          created_at: string
+          game_id: string
+          id: string
+          model: string
+          payload: Json
+        }
+        Insert: {
+          context_hash: string
+          created_at?: string
+          game_id: string
+          id?: string
+          model: string
+          payload: Json
+        }
+        Update: {
+          context_hash?: string
+          created_at?: string
+          game_id?: string
+          id?: string
+          model?: string
+          payload?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advisor_insights_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      advisor_messages: {
+        Row: {
+          blocked: boolean
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          role: string
+        }
+        Insert: {
+          blocked?: boolean
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          role: string
+        }
+        Update: {
+          blocked?: boolean
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advisor_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "advisor_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      advisor_usage: {
+        Row: {
+          question_count: number
+          usage_date: string
+          user_id: string
+        }
+        Insert: {
+          question_count?: number
+          usage_date: string
+          user_id: string
+        }
+        Update: {
+          question_count?: number
+          usage_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advisor_usage_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      api_cache: {
+        Row: {
+          cache_key: string
+          fetched_at: string
+          payload: Json
+        }
+        Insert: {
+          cache_key: string
+          fetched_at?: string
+          payload: Json
+        }
+        Update: {
+          cache_key?: string
+          fetched_at?: string
+          payload?: Json
+        }
+        Relationships: []
+      }
       bridge_players: {
         Row: {
           id: string
@@ -545,6 +740,49 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      advisor_consume_quota: { Args: { p_limit: number }; Returns: number }
+      advisor_crowd_split: {
+        Args: { p_game_id: string }
+        Returns: {
+          picks: number
+          question_type: string
+          selected_outcome: string
+        }[]
+      }
+      advisor_publish_insight: {
+        Args: {
+          p_context_hash: string
+          p_game_id: string
+          p_model: string
+          p_payload: Json
+        }
+        Returns: undefined
+      }
+      advisor_quota_remaining: { Args: { p_limit: number }; Returns: number }
+      api_cache_get: {
+        Args: { p_key: string; p_max_age_seconds: number }
+        Returns: Json
+      }
+      api_cache_put: {
+        Args: { p_key: string; p_payload: Json }
+        Returns: undefined
+      }
+      landing_advisor_card: {
+        Args: never
+        Returns: {
+          away_logo: string
+          away_team: string
+          competition_name: string
+          home_logo: string
+          home_team: string
+          kickoff_at: string
+          payload: Json
+        }[]
+      }
+      owns_advisor_conversation: {
+        Args: { p_conversation_id: string }
+        Returns: boolean
+      }
       admin_delete_user: { Args: { p_user_id: string }; Returns: undefined }
       admin_list_games: {
         Args: {

@@ -9,6 +9,10 @@
     {
       "path": "/api/cron/settle",
       "schedule": "30 4 * * *"
+    },
+    {
+      "path": "/api/cron/advisor-pick",
+      "schedule": "0 5 * * *"
     }
   ]
 }

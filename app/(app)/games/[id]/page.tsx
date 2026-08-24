@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { QuestionCard } from "@/components/games/question-card";
+import { AdvisorSheet } from "@/components/advisor/advisor-sheet";
 import { LiveScore } from "@/components/games/live-score";
 import { LiveRefresher } from "@/components/shared/live-refresher";
 import { projectPrediction } from "@/lib/domain/live-projection";
@@ -136,6 +137,16 @@ export default async function GamePage({
             התוצאה מתעדכנת בזמן אמת
           </span>
         </div>
+      )}
+
+      {/* Only while the match is still open. After kick-off the questions are
+          locked, and advice on a guess nobody can make is noise. */}
+      {game.status === "scheduled" && !started && (
+        <AdvisorSheet
+          gameId={game.id}
+          homeTeam={game.home_team}
+          awayTeam={game.away_team}
+        />
       )}
 
       {bonusPct > 0 && (
