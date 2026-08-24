@@ -3,6 +3,7 @@ import { ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { AdminSearch } from "@/components/site-admin/admin-search";
 import { UserActions } from "@/components/site-admin/user-actions";
+import { SiteAdminsCard, type SiteAdminRow } from "@/components/site-admin/site-admins-card";
 import { Pagination } from "@/components/shared/pagination";
 import { formatDate, formatDateTime, formatNumber, formatPoints } from "@/lib/format";
 import {
@@ -38,12 +39,15 @@ export default async function AdminUsersPage({
   } = await supabase.auth.getUser();
 
   // One row over the page size answers "is there a next page" without a
-  // second count query.
-  const { data: users, error } = await supabase.rpc("admin_list_users", {
-    p_search: search || null,
-    p_limit: PAGE_SIZE + 1,
-    p_offset: (page - 1) * PAGE_SIZE,
-  });
+  // second count query. The operators list rides the same round trip.
+  const [{ data: users, error }, { data: siteAdmins }] = await Promise.all([
+    supabase.rpc("admin_list_users", {
+      p_search: search || null,
+      p_limit: PAGE_SIZE + 1,
+      p_offset: (page - 1) * PAGE_SIZE,
+    }),
+    supabase.rpc("admin_list_site_admins"),
+  ]);
 
   const rows = (users ?? []).slice(0, PAGE_SIZE);
   const hasNext = (users ?? []).length > PAGE_SIZE;
@@ -55,6 +59,10 @@ export default async function AdminUsersPage({
         <span className="section-label">👥 משתמשים</span>
         <h1 className="text-2xl font-black leading-tight md:text-3xl">כל המשתמשים</h1>
       </div>
+
+      {(siteAdmins ?? []).length > 0 && (
+        <SiteAdminsCard admins={(siteAdmins ?? []) as SiteAdminRow[]} selfId={user!.id} />
+      )}
 
       <AdminSearch
         basePath="/admin/users"

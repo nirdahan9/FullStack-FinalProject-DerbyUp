@@ -824,6 +824,17 @@ export type Database = {
           status: string
         }[]
       }
+      admin_list_site_admins: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          email: string
+          id: string
+          username: string
+        }[]
+      }
       admin_list_users: {
         Args: { p_limit?: number; p_offset?: number; p_search?: string | null }
         Returns: {

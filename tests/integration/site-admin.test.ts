@@ -150,6 +150,43 @@ describe("§5.4 ניהול אתר", () => {
     expect(down.error).toBeNull();
   });
 
+  it("10א. משתמש רגיל קורא את רשימת המנהלים — נדחה", async () => {
+    const { data, error } = await regular.client.rpc("admin_list_site_admins");
+    expect(error?.message).toContain("NOT_SITE_ADMIN");
+    expect(data).toBeNull();
+  });
+
+  it("10ב. רשימת המנהלים עוקבת אחרי מינוי והסרה", async () => {
+    // Containment rather than equality: the live database carries real
+    // operators, and other suites may be appointing their own in parallel.
+    const before = await operator.client.rpc("admin_list_site_admins");
+    expect(before.error).toBeNull();
+    const ids = (rows: unknown) => ((rows ?? []) as { id: string }[]).map((r) => r.id);
+    expect(ids(before.data)).toContain(operator.id);
+    expect(ids(before.data)).not.toContain(regular.id);
+
+    await operator.client.rpc("admin_set_site_admin", {
+      p_user_id: regular.id,
+      p_value: true,
+    });
+    const during = await operator.client.rpc("admin_list_site_admins");
+    expect(ids(during.data)).toContain(regular.id);
+
+    // The list is the role, live: revocation removes the row — and the email
+    // column proves the join to auth.users held for the appointed account.
+    const row = ((during.data ?? []) as { id: string; email: string }[]).find(
+      (r) => r.id === regular.id,
+    );
+    expect(row?.email).toBe(regular.email);
+
+    await operator.client.rpc("admin_set_site_admin", {
+      p_user_id: regular.id,
+      p_value: false,
+    });
+    const after = await operator.client.rpc("admin_list_site_admins");
+    expect(ids(after.data)).not.toContain(regular.id);
+  });
+
   // ─── Settling ────────────────────────────────────────────────────────────
 
   it("11. משתמש רגיל מעבד משחק — נדחה, והמשחק לא נגע", async () => {

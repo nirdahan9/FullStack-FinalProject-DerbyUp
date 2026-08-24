@@ -25,6 +25,11 @@ import {
  * an operator who could demote themselves could lock the last admin out, and
  * deleting yourself would end the session mid-request — so the buttons are
  * hidden rather than left to fail.
+ *
+ * Both writes confirm first. Deletion always has; the admin toggle earned the
+ * same treatment because granting the role hands over the whole dashboard —
+ * including the power to appoint and remove other operators — and revoking it
+ * locks a colleague out. Neither belongs one accidental tap away.
  */
 export function UserActions({
   userId,
@@ -64,21 +69,43 @@ export function UserActions({
 
   return (
     <div className="flex items-center justify-end gap-1">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="gap-1.5"
-        disabled={pending}
-        onClick={toggleAdmin}
-        title={isAdmin ? "הסרת הרשאת ניהול" : "מינוי למנהל אתר"}
-      >
-        {isAdmin ? (
-          <ShieldOff className="h-3.5 w-3.5" />
-        ) : (
-          <ShieldCheck className="h-3.5 w-3.5" />
-        )}
-        <span className="hidden sm:inline">{isAdmin ? "הסרת ניהול" : "מינוי"}</span>
-      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5"
+            disabled={pending}
+            title={isAdmin ? "הסרת הרשאת ניהול" : "מינוי למנהל אתר"}
+          >
+            {isAdmin ? (
+              <ShieldOff className="h-3.5 w-3.5" />
+            ) : (
+              <ShieldCheck className="h-3.5 w-3.5" />
+            )}
+            {isAdmin ? "הסרת ניהול" : "מינוי"}
+          </Button>
+        </AlertDialogTrigger>
+
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-right">
+              {isAdmin ? `להסיר את ${displayName} מניהול האתר?` : `למנות את ${displayName} למנהל אתר?`}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              {isAdmin
+                ? "הגישה לדשבורד הניהול תיחסם מיידית. אפשר למנות מחדש בכל רגע."
+                : "מנהל אתר רואה את כל המשתמשים, הליגות והניחושים, יכול לעבד משחקים ולמחוק משתמשים — וגם למנות ולהסיר מנהלים אחרים, כולל אותך."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>ביטול</AlertDialogCancel>
+            <AlertDialogAction onClick={toggleAdmin}>
+              {isAdmin ? "הסרה" : "מינוי"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog>
         <AlertDialogTrigger asChild>
