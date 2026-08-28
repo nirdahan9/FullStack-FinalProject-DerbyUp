@@ -3,7 +3,7 @@ import { buildGameContext } from "@/lib/advisor/context";
 import type { AdvisorClient } from "@/lib/advisor/db";
 import { buildInsightPrompt, DEFAULT_SYSTEM_PROMPT } from "@/lib/advisor/prompts";
 import { generateJson } from "@/lib/advisor/provider";
-import { decorate, INSIGHT_RESPONSE_SCHEMA, insightSchema } from "@/lib/advisor/schema";
+import { DAILY_PICK_RESPONSE_SCHEMA, decorate, insightSchema } from "@/lib/advisor/schema";
 import type { Outcome } from "@/lib/football-api/types";
 
 /**
@@ -121,18 +121,21 @@ export async function refreshDailyPicks(): Promise<PickReport> {
 
     try {
       const context = await buildGameContext(candidate.gameId, { enrich: true, client });
+      // The daily card always answers "מי ינצח": the schema's enum has one
+      // member and the prompt says so, and the check below catches the case
+      // where neither held.
       const call = await generateJson({
         model: MODEL,
         systemInstruction: DEFAULT_SYSTEM_PROMPT,
-        prompt: buildInsightPrompt(context),
-        responseSchema: INSIGHT_RESPONSE_SCHEMA,
+        prompt: buildInsightPrompt(context, { winnerOnly: true }),
+        responseSchema: DAILY_PICK_RESPONSE_SCHEMA,
         temperature: 0.3,
         maxOutputTokens: 2048,
         thinkingLevel: "low",
       });
 
       const parsed = insightSchema.safeParse(JSON.parse(call.text));
-      if (!parsed.success) {
+      if (!parsed.success || parsed.data.recommendation.question_type !== "match_result") {
         report.failed += 1;
         continue;
       }

@@ -68,6 +68,32 @@ export const INSIGHT_RESPONSE_SCHEMA = {
   propertyOrdering: ["headline", "recommendation", "reasons"],
 } as const;
 
+/**
+ * The nightly pick, unlike the on-demand analysis, always answers the same
+ * question: who wins. The dashboard card is the first thing a returning user
+ * sees, and "מי ינצח" every day reads as a habit; a card that alternates
+ * between goals markets and winner markets reads as noise. Constrained
+ * decoding enforces it — the enum has one member, so the model cannot answer
+ * anything else — and the cron double-checks the value anyway.
+ */
+export const DAILY_PICK_RESPONSE_SCHEMA = {
+  ...INSIGHT_RESPONSE_SCHEMA,
+  properties: {
+    ...INSIGHT_RESPONSE_SCHEMA.properties,
+    recommendation: {
+      ...INSIGHT_RESPONSE_SCHEMA.properties.recommendation,
+      properties: {
+        ...INSIGHT_RESPONSE_SCHEMA.properties.recommendation.properties,
+        question_type: {
+          type: "STRING",
+          enum: ["match_result"],
+          description: "בבחירה היומית ההמלצה היא תמיד על שאלת מנצח המשחק.",
+        },
+      },
+    },
+  },
+} as const;
+
 export const insightSchema = z.object({
   headline: z.string().min(1).max(220),
   recommendation: z.object({

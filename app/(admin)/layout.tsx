@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ShieldCheck, ShieldX } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { AdminNav } from "@/components/site-admin/admin-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -39,9 +39,29 @@ export default async function AdminLayout({
 
   const { data: isAdmin } = await supabase.rpc("is_site_admin");
 
-  // A signed-in user who is not an operator is sent to the app rather than
-  // shown a 403: there is nothing here for them to be told about.
-  if (!isAdmin) redirect("/dashboard");
+  // A signed-in user who is not an operator is told so rather than silently
+  // bounced: the only way to land here without the shield button is to type
+  // the URL, and a redirect would leave that person wondering what happened.
+  if (!isAdmin) {
+    return (
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-background px-6 text-center">
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
+          <ShieldX className="h-7 w-7 text-destructive" />
+        </span>
+        <h1 className="text-xl font-black">אין לך הרשאה להיכנס לכאן</h1>
+        <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
+          אזור הניהול פתוח למנהלי האתר בלבד.
+        </p>
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition-opacity hover:opacity-90"
+        >
+          חזרה לאפליקציה
+          <ArrowLeft className="h-4 w-4" />
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">

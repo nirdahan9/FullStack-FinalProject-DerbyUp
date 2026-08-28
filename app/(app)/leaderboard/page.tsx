@@ -29,7 +29,7 @@ export default async function LeaderboardPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  const [{ data: board, error }, { data: me }, { count: ahead }] = await Promise.all([
+  const [{ data: board, error }, { data: me }] = await Promise.all([
     supabase.rpc("get_global_leaderboard", {
       p_limit: PAGE_SIZE + 1,
       p_offset: (page - 1) * PAGE_SIZE,
@@ -39,12 +39,6 @@ export default async function LeaderboardPage({
       .select("display_name, total_points, total_correct")
       .eq("id", user!.id)
       .single(),
-    // Rank without reading anybody's row: how many scores beat mine. head:true
-    // makes this a count rather than a payload that gets discarded.
-    supabase
-      .from("profiles")
-      .select("*", { count: "exact", head: true })
-      .gt("total_points", 0),
   ]);
 
   const all = board ?? [];
@@ -93,7 +87,7 @@ export default async function LeaderboardPage({
         <div className="card-kickoff flex items-center justify-between gap-3">
           <span className="flex flex-col">
             <span className="text-[11px] text-muted-foreground">הניקוד שלך</span>
-            <span className="text-sm font-bold" dir="auto">
+            <span className="text-right text-sm font-bold" dir="auto">
               {me?.display_name ?? "אתה"}
             </span>
           </span>
@@ -121,10 +115,6 @@ export default async function LeaderboardPage({
       )}
 
       <Pagination page={page} hasNext={hasNext} baseUrl="/leaderboard" />
-
-      <p className="text-center text-xs text-muted-foreground">
-        {ahead ?? 0} משתמשים צברו נקודות עד כה.
-      </p>
     </div>
   );
 }

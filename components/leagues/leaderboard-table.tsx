@@ -79,8 +79,11 @@ export function LeaderboardTable({
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="flex items-center gap-1 truncate text-sm font-bold" dir="auto">
-                <span className="truncate">{row.displayName}</span>
+              {/* dir sits on the name alone: an English name still renders
+                  left-to-right internally, but the row itself stays RTL so
+                  every name — Hebrew or Latin — starts at the right edge. */}
+              <p className="flex items-center gap-1 truncate text-sm font-bold">
+                <span className="truncate" dir="auto">{row.displayName}</span>
                 {creatorId === row.userId && (
                   <Crown size={11} className="shrink-0 text-amber-500" />
                 )}

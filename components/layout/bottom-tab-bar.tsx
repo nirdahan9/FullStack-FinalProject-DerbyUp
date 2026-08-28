@@ -10,7 +10,7 @@ const TABS = [
   { href: "/advisor", icon: Sparkles, label: "יועץ" },
   { href: "/leagues", icon: Trophy, label: "ליגות" },
   { href: "/leaderboard", icon: Globe, label: "דירוג" },
-  { href: "/challenge", icon: Gamepad2, label: "אתגרים" },
+  { href: "/challenge", icon: Gamepad2, label: "אתגר יומי" },
 ] as const;
 
 /**

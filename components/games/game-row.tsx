@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Star } from "lucide-react";
+import { Check, Star } from "lucide-react";
 import { LiveScore } from "@/components/games/live-score";
 import { translateTeam } from "@/lib/i18n/teams";
 
@@ -102,7 +102,7 @@ export function GameRow({
       </div>
 
       <span
-        className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
+        className={`flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold ${
           live || predictedCount > 0
             ? "bg-secondary text-muted-foreground"
             : "bg-primary text-primary-foreground"
@@ -111,13 +111,18 @@ export function GameRow({
         {/* No call to action once the whistle has gone: validatePrediction
             refuses a fixture that is not 'scheduled', so offering it would be
             a button that can only fail. */}
-        {live
-          ? predictedCount > 0
-            ? `${predictedCount}/3`
-            : "נעול"
-          : predictedCount > 0
-            ? `${predictedCount}/3`
-            : "נחש"}
+        {predictedCount > 0 ? (
+          // The check says "these are answered questions" — without it, 2/3
+          // reads as a score or a date rather than two guesses out of three.
+          <>
+            <Check className="h-3.5 w-3.5" strokeWidth={3} />
+            {`${predictedCount}/3`}
+          </>
+        ) : live ? (
+          "נעול"
+        ) : (
+          "נחש"
+        )}
       </span>
     </Link>
   );

@@ -235,12 +235,20 @@ export function buildUserBlock(question: string): string {
 }
 
 /** The opening analysis: no user text involved, so nothing to fence. */
-export function buildInsightPrompt(ctx: GameContext): string {
+export function buildInsightPrompt(
+  ctx: GameContext,
+  opts?: { winnerOnly?: boolean },
+): string {
   return [
     buildContextBlock(ctx),
     "",
     "### המשימה",
-    "נתח את המשחק והמלץ על ניחוש אחד — זה עם תוחלת הנקודות הגבוהה ביותר.",
+    ...(opts?.winnerOnly
+      ? [
+          "נתח את המשחק והמלץ על ניחוש אחד בשאלת מנצח המשחק (type=match_result)",
+          "בלבד — בית, תיקו או חוץ. שאר השאלות הן הקשר, לא אפשרות המלצה.",
+        ]
+      : ["נתח את המשחק והמלץ על ניחוש אחד — זה עם תוחלת הנקודות הגבוהה ביותר."]),
     "מלא את כל שדות הסכמה. `outcome_key` ו-`question_type` חייבים להילקח",
     "בדיוק מהרשימה למעלה.",
   ].join("\n");
