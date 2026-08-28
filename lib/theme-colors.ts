@@ -17,14 +17,11 @@ export const THEME_COLORS = [
   { id: "default", label: "ברירת מחדל" },
   { id: "inter-miami", label: "אינטר מיאמי" },
   { id: "maccabi-ta", label: "מכבי תל אביב" },
-  { id: "hapoel-ta", label: "הפועל תל אביב" },
   { id: "beitar", label: "בית״ר ירושלים" },
   { id: "spain", label: "נבחרת ספרד" },
   { id: "brazil", label: "נבחרת ברזיל" },
-  { id: "inter", label: "אינטר" },
   { id: "israel", label: "ישראל" },
   { id: "liverpool", label: "ליברפול" },
-  { id: "dortmund", label: "דורטמונד" },
   { id: "uruguay", label: "נבחרת אורוגוואי" },
 ] as const;
 

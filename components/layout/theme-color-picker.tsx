@@ -21,10 +21,13 @@ import {
  *    while hydrating, so there is no markup mismatch and no setState in an
  *    effect for the lint rule to object to.
  *
- * 2. Each swatch wears its own `theme-*` class, so the CSS variables cascade
- *    into it and `bg-primary`/`bg-accent` paint the real palette. The
- *    alternative — a hex table in TypeScript — would be a second copy of every
- *    colour to keep in step with globals.css.
+ * 2. Each swatch wears its own `theme-*` class, so the theme's CSS variables
+ *    apply to it directly and the gradient paints the real palette. Only the
+ *    light values exist at that scope (globals.css defines no `.dark .theme-*`
+ *    descendant form), so a dot looks the same in both modes; a theme may
+ *    override `--swatch-a`/`--swatch-b` when its dot should show something
+ *    other than primary/accent. The alternative — a hex table in TypeScript —
+ *    would be a second copy of every colour to keep in step with globals.css.
  */
 export function ThemeColorPicker() {
   const selected = useSyncExternalStore(
@@ -62,10 +65,10 @@ export function ThemeColorPicker() {
             >
               <span
                 aria-hidden
-                className={`theme-${theme.id} h-4 w-4 shrink-0 rounded-full ring-1 ring-inset ring-black/10`}
+                className={`theme-${theme.id} h-4 w-4 shrink-0 rounded-full ring-1 ring-inset ring-black/10 dark:ring-white/20`}
                 style={{
                   background:
-                    "linear-gradient(135deg, hsl(var(--primary)) 0 50%, hsl(var(--accent)) 50% 100%)",
+                    "linear-gradient(135deg, hsl(var(--swatch-a, var(--primary))) 0 50%, hsl(var(--swatch-b, var(--accent))) 50% 100%)",
                 }}
               />
               <span className="truncate">{theme.label}</span>
