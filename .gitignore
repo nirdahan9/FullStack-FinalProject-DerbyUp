@@ -16,6 +16,10 @@ docs/*
 !docs/planning/
 *.docx
 *.doc
+# tracked by name: the defense deck and the course brief
+!docs/DerbyUp-Presentation.pptx
+!docs/מטלת סיום.docx
+!docs/מטלת סיום - תוספות ועדכונים.docx
 
 # ---------------------------------------------------------------
 # Secrets — never commit
