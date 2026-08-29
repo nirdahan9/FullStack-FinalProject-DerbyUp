@@ -1,263 +1,279 @@
-# DerbyUp — ניחושי כדורגל לארגונים
+# DerbyUp — Football Predictions for Organizations
 
-**פרויקט סיום · Internet Technologies: Become a Full-Stack Engineer · RUNI CS 2026**
-**מחבר:** ניר דהן
+**Final Project · Internet Technologies: Become a Full-Stack Engineer · RUNI CS 2026**
+**Author:** Nir Dahan
 
 | | |
 |---|---|
-| 🌐 **האתר החי** | **https://derbyup-runi-fullstack.vercel.app** |
-| 📦 **הריפו** | https://github.com/nirdahan9/FullStack-FinalProject-DerbyUp |
+| 🌐 **Live site** | **https://derbyup-runi-fullstack.vercel.app** |
+| 📦 **Repository** | https://github.com/nirdahan9/FullStack-FinalProject-DerbyUp |
 
 ---
 
-## מה זה
+## What it is
 
-פלטפורמה שבה ארגון פותח **ליגת ניחושים פנימית**: המנהל פותח ליגה, בוחר טורניר,
-ומזמין את העובדים בקוד. כל אחד מנחש תוצאות של משחקי כדורגל אמיתיים, והטבלה
-מתעדכנת לבד.
+A platform where an organization runs an **internal prediction league**: an admin
+opens a league, picks a tournament, and invites employees with a code. Everyone
+predicts the outcomes of real football matches, and the standings update on
+their own.
 
-**הבעיה שזה פותר:** גיבוש ארגוני שדורש תיאום — יום כיף, טורניר, ערב צוות — עולה
-כסף וזמן, וקורה פעמיים בשנה. ליגת ניחושים רצה **ברקע כל שבוע**, בלי לגזול זמן
-עבודה, ונותנת לעובדים סיבה לדבר זה עם זה.
+**The problem it solves:** team-building that requires coordination — a fun day,
+a tournament, a team evening — costs money and time, and happens twice a year. A
+prediction league runs **in the background every week**, takes no time away from
+work, and gives employees a reason to talk to each other.
 
-### מודל הניקוד — הכלל שממנו נגזר כל השאר
+### The scoring model — the rule everything else derives from
 
-> **מנחשים. צדקת — מקבלים את היחס כנקודות. טעית — אפס.**
-> ניחוש נכון ביחס 7.15 שווה **7.15 נקודות**.
+> **You predict. Right — you get the odds as points. Wrong — zero.**
+> A correct pick at odds of 7.15 is worth **7.15 points**.
 
-**אין הימור, אין יתרה, אין הפסד.** נקודות רק נצברות. ההחלטה הזו מסבירה חצי
-מהארכיטקטורה: אין טבלת תנועות, אין טרנזקציה מרובת-טבלאות, ואין מצב שבו משתמש
-"נתקע" בלי יכולת להשתתף.
+**No wagering, no balance, no losses.** Points only accumulate. This decision
+explains half the architecture: there is no transactions table, no
+multi-table transaction, and no state in which a user is "stuck" and unable to
+participate.
 
-### שני לוחות תוצאות
+### Two leaderboards
 
-| | 🏆 דירוג הליגה | 🌍 לידרבורד האתר |
+| | 🏆 League standings | 🌍 Site leaderboard |
 |---|---|---|
-| מי | חברי הליגה | כל המשתמשים |
-| מה נספר | **רק "מי ינצח"** | שלושת סוגי השאלות + האתגר היומי |
-| מאיזה רגע | מרגע ההצטרפות | מאז ההרשמה |
-| מימוש | **מחושב** מהניחושים | עמודת מטמון |
+| Who | League members | All users |
+| What counts | **Match-winner picks only** | All three question types + the daily challenge |
+| Since when | Since joining the league | Since signing up |
+| Implementation | **Computed** from predictions | Cached column |
 
-דירוג הליגה נשאר פשוט ומובן — כולם מנחשים מי ינצח, ועובד שלא מבין ב-Over/Under
-לא נשאר מאחור. הלידרבורד הכללי מודד את כל העומק.
+League standings stay simple and legible — everyone predicts who wins, and an
+employee who doesn't know what Over/Under means is not left behind. The global
+leaderboard measures the full depth.
 
-### 🎯 תוצאה מדויקת — בונוס ×3
+### 🎯 Exact score — ×3 bonus
 
-לצד ניחוש המנצחת אפשר לנחש גם את התוצאה. פגעת בשתיהן — **פי 3**. פגעת רק
-במנצחת — **הניקוד המלא הרגיל**. הפספוס לא עולה כלום, ולכן אין שיקול שלא לנסות.
+Alongside the match-winner pick you can also predict the exact score. Hit both —
+**3× the points**. Hit only the winner — **the full regular payout**. Missing
+costs nothing, so there is never a reason not to try.
 
-### ✨ יועץ AI — עצה לפני הניחוש
+### ✨ AI advisor — an opinion before you pick
 
-לפני כל ניחוש אפשר לפתוח את היועץ ולקבל **דעה מנומקת בעברית**: מה הוא חושב שיקרה ולמה,
-בשפת כדורגל ולא בשפת סטטיסטיקה. אפשר גם לשאול אותו שאלות המשך על אותו משחק.
+Before any prediction you can open the advisor and get a **reasoned opinion in
+Hebrew**: what it thinks will happen and why, in football language rather than
+statistics language. You can also ask it follow-up questions about the same
+match.
 
-הוא נשען על היחסים, הכושר האחרון, המפגשים הקודמים והתפלגות הניחושים בליגה — ומשלים
-מ-API-Football את מה שחסר. **הוא ממליץ לפי תוחלת הנקודות, לא לפי הפייבוריט**, וזה נובע
-ישירות ממודל הניקוד: כשאין מה להפסיד, יחס גבוה שווה יותר.
+It draws on the odds, recent form, past meetings, and how the league's members
+have predicted — and fills in the gaps from API-Football. **It recommends by
+expected points, not by the favourite**, which follows directly from the scoring
+model: when there is nothing to lose, high odds are worth more.
 
-שלוש שכבות הגנה שומרות עליו בתחומו — כללים דטרמיניסטיים (חינם), מסווג זול, וסכמה שמאמתת
-שההמלצה מצביעה על הימור שבאמת קיים במשחק. מכסה יומית מגנה על עלות ה-API.
+Three guard layers keep it on topic — deterministic rules (free), a cheap
+classifier, and a schema that verifies the recommendation points at a bet that
+actually exists in the match. A daily quota protects the API bill.
 
-כל בוקר נבחר גם **משחק אחד לכל טורניר** — הכי פחות צפוי לפי פער היחסים — ומנותח מראש
-ל-cron. הוא זה שמופיע בדשבורד ובעמוד הנחיתה, ולכן שני המסכים האלה לא עולים דבר ולא מחכים
-לאף מודל.
+Every morning one **match per tournament** is also selected — the least
+predictable by odds gap — and analysed ahead of time by cron. That match is the
+one shown on the dashboard and the landing page, so neither screen costs
+anything or waits on a model.
 
-### 🔴 תוצאות חיות — והטבלה זזה איתן
+### 🔴 Live scores — and the standings move with them
 
-משחק שהתחיל לא נעלם. התוצאה והדקה מתעדכנות **כל דקה**, וכל ניחוש תלוי מקבל את
-הנקודות שהיה מקבל אילו המשחק היה נגמר עכשיו — מוצגות **בירוק, כתוספת נפרדת**
-לצד הסכום, כי שער שוויון בדקה 88 לוקח אותן בחזרה.
+A match that has kicked off doesn't disappear. The score and the minute update
+**every minute**, and every affected prediction shows the points it would earn
+if the match ended right now — displayed **in green, as a separate addition**
+next to the total, because an 88th-minute equaliser takes them back.
 
-**השכבה החיה לא כותבת נקודות.** היא קוראת ל-`settlePrediction` — **אותה
-פונקציה** שהעיבוד קורא לה — עם התוצאה הנוכחית במקום הסופית. לכן המספר שעל המסך
-בזמן המשחק הוא המספר שנרשם בטבלה אחריו, ולא "כמעט".
+**The live layer writes no points.** It calls `settlePrediction` — the **same
+function** settlement calls — with the current score instead of the final one.
+So the number on screen during the match is the number written to the standings
+after it, not "almost".
 
-### 🛡️ שני סוגי ניהול
+### 🛡️ Two kinds of admin
 
-| | 🏢 אדמין ליגה | 🛡️ מנהל אתר |
+| | 🏢 League admin | 🛡️ Site admin |
 |---|---|---|
-| מי | יוצר הליגה הפרטית | מפעילי המוצר — `profiles.is_site_admin` |
-| איפה | `/leagues/[id]/admin` | **`/admin`** |
-| מה | פרסים · בחירת העורך · עיבוד ידני בטורניר שלו | סקירה · משתמשים · משחקים · ליגות — בכל המוצר |
+| Who | The creator of a private league | Product operators — `profiles.is_site_admin` |
+| Where | `/leagues/[id]/admin` | **`/admin`** |
+| What | Prizes · choosing the editor · manual settlement in their tournament | Overview · users · games · leagues — across the whole product |
 
-דאשבורד הניהול קורא דרך פונקציות `SECURITY DEFINER` שבודקות את התפקיד בעצמן —
-**מפתח ה-service role לא נכנס לשום מסלול של משתמש.**
+The admin dashboard reads through `SECURITY DEFINER` functions that check the
+role themselves — **the service-role key never enters any user-facing path.**
 
 ---
 
-## הרצה מקומית
+## Running locally
 
-### דרישות מוקדמות
+### Prerequisites
 
 - **Node.js 20+**
-- פרויקט **Supabase** (חינמי)
-- מפתח **API-Football** מ-[api-sports.io](https://www.api-football.com/)
+- A **Supabase** project (free tier is fine)
+- An **API-Football** key from [api-sports.io](https://www.api-football.com/)
 
-### שלבים
+### Steps
 
 ```bash
-# 1. שכפול והתקנה
+# 1. Clone and install
 git clone https://github.com/nirdahan9/FullStack-FinalProject-DerbyUp.git
 cd FullStack-FinalProject-DerbyUp
 npm install
 
-# 2. משתני סביבה
+# 2. Environment variables
 cp .env.example .env.local
-#    ← למלא לפי הטבלה למטה
+#    ← fill in using the table below
 
-# 3. הקמת הסכימה בפרויקט Supabase שלכם
+# 3. Set up the schema in your Supabase project
 npx supabase link --project-ref <project-ref>
-npx supabase db push          # מריץ את 16 המיגרציות שב-supabase/migrations/
+npx supabase db push          # runs the 22 migrations in supabase/migrations/
 
-# 4. זריעת התחרויות והמשחקים
-npm run seed                  # 7 תחרויות
+# 4. Seed competitions and fixtures
+npm run seed                  # 7 competitions
 curl -X POST http://localhost:3000/api/cron/sync-fixtures \
-     -H "Authorization: Bearer $CRON_SECRET"   # משחקים + יחסים מ-API-Football
+     -H "Authorization: Bearer $CRON_SECRET"   # fixtures + odds from API-Football
 
-# 5. הרצה
+# 5. Run
 npm run dev                   # http://localhost:3000
 ```
 
-> **בלי שלב 4 האתר יעלה אבל יהיה ריק** — אין משחקים לנחש עליהם. הסנכרון מושך
-> את העונה הנוכחית משבע התחרויות ובונה שלוש שאלות לכל משחק.
+> **Without step 4 the site comes up empty** — there are no matches to predict.
+> The sync pulls the current season of all seven competitions and builds three
+> questions per match.
 
-### משתני הסביבה
+### Environment variables
 
-| משתנה | חובה | מה זה ומאיפה |
+| Variable | Required | What it is and where it comes from |
 |---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | כתובת הפרויקט. Dashboard → Project Settings → API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | מפתח ציבורי, נחשף לדפדפן. **בטוח לחשיפה** — RLS הוא מה שמגן, לא המפתח |
-| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | **עוקף RLS.** צד שרת בלבד — מסלולי cron וכתיבה שמשתמש אינו רשאי לבצע. אף פעם לא ב-Client Component |
-| `FOOTBALL_API_KEY` | ✅ | מפתח api-sports.io. משחקים, תוצאות ויחסים |
+| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | The project URL. Dashboard → Project Settings → API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Public key, exposed to the browser. **Safe to expose** — RLS is what protects the data, not the key |
+| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | **Bypasses RLS.** Server-side only — cron routes and writes a user is not allowed to make. Never in a Client Component |
+| `FOOTBALL_API_KEY` | ✅ | api-sports.io key. Fixtures, results and odds |
 | `FOOTBALL_API_BASE_URL` | ✅ | `https://v3.football.api-sports.io` |
-| `CRON_SECRET` | ✅ | סוד משותף שמגן על `/api/cron/*`. בלי header תקין → `401` |
-| `LIVE_SCORES_ENABLED` | — | `false` מכבה את הסנכרון החי בלי deploy. ברירת המחדל: דולק |
-| `GEMINI_API_KEY` | ✅ | מפתח Google AI Studio ליועץ ה-AI. **צד שרת בלבד** — נקרא ב-Server Action ולא מגיע לדפדפן |
-| `GEMINI_MODEL` | — | ברירת מחדל `gemini-3.5-flash`. הדגם החדש יותר מוגבל ל-20 בקשות בשכבה החינמית |
-| `GEMINI_GUARD_MODEL` | — | ברירת מחדל `gemini-3.5-flash-lite` — המסווג הזול שרץ לפני הקריאה היקרה |
-| `ADVISOR_DAILY_LIMIT` | — | תשובות יועץ ליום למשתמש. ברירת מחדל 10, נאכף ב-Postgres |
-| `SUPABASE_PROJECT_REF` | — | לסקריפטי תחזוקה בלבד (`scripts/db-exec.mjs`). האתר רץ בלעדיו |
-| `SUPABASE_ACCESS_TOKEN` | — | אותו דבר. Dashboard → Account → Access Tokens |
+| `CRON_SECRET` | ✅ | Shared secret guarding `/api/cron/*`. No valid header → `401` |
+| `LIVE_SCORES_ENABLED` | — | `false` turns off the live sync without a deploy. Default: on |
+| `GEMINI_API_KEY` | ✅ | Google AI Studio key for the AI advisor. **Server-side only** — read in a Server Action, never reaches the browser |
+| `GEMINI_MODEL` | — | Default `gemini-3.5-flash`. The newer model is capped at 20 requests on the free tier |
+| `GEMINI_GUARD_MODEL` | — | Default `gemini-3.5-flash-lite` — the cheap classifier that runs before the expensive call |
+| `ADVISOR_DAILY_LIMIT` | — | Advisor answers per user per day. Default 10, enforced in Postgres |
+| `SUPABASE_PROJECT_REF` | — | Maintenance scripts only (`scripts/db-exec.mjs`). The site runs without it |
+| `SUPABASE_ACCESS_TOKEN` | — | Same. Dashboard → Account → Access Tokens |
 
-**איך הסודות נשמרים:** `.env.local` מוחרג מ-git; בפרודקשן הם Environment Variables
-של Vercel; ו-`CRON_SECRET` שמור גם ב-**Supabase Vault** כדי ש-pg_cron יוכל לקרוא
-לנקודת העיבוד. שום סוד אינו בקוד ואינו בריפו.
+**How the secrets are kept:** `.env.local` is git-ignored; in production they
+are Vercel Environment Variables; and `CRON_SECRET` is also stored in
+**Supabase Vault** so pg_cron can call the settlement endpoint. No secret is in
+the code or the repository.
 
 ---
 
-## הרצת הבדיקות
+## Running the tests
 
 ```bash
-npm test                  # 331 בדיקות יחידה וקומפוננטות — לא נוגע ברשת, < שנייה
-npm run test:integration  # 196 בדיקות מול Supabase — דורש .env.local
-npm run test:e2e          # 27 בדיקות Playwright — דורש שרת מקומי
-npm run test:coverage     # דוח כיסוי → coverage/index.html
-npm run test:clean        # ניקוי שאריות מריצה שנקטעה
+npm test                  # 331 unit and component tests — no network involved
+npm run test:integration  # 196 tests against Supabase — requires .env.local
+npm run test:e2e          # 27 Playwright tests — requires a local server
+npm run test:coverage     # coverage report → coverage/index.html
+npm run test:clean        # clean up leftovers from an interrupted run
 ```
 
-| חבילה | בדיקות | מה היא מוכיחה |
+| Suite | Tests | What it proves |
 |---|---|---|
-| `unit` | 285 | לוגיקת הניקוד, העיבוד, **השכבה החיה**, הדירוג, הוולידציות **ושכבות ההגנה של היועץ** |
-| `components` | 46 | מה שהמסך **אומר**: נקודות על אריח, מצב נעול, **תוצאה חיה**, **כרטיס הדעה**, מי מודגש בטבלה |
-| `integration` | 196 | הרשאות ו-RLS מול DB אמיתי, שני לוחות התוצאות, **השכבה החיה**, **מכסות היועץ** ודאשבורד הניהול |
-| `e2e` | 27 | המסע המלא בדפדפן — הרשמה → ליגה → ניחוש → **משחק חי** → **יועץ** → עיבוד → טבלה |
+| `unit` | 285 | Scoring logic, settlement, **the live layer**, standings, validations **and the advisor's guard layers** |
+| `components` | 46 | What the screen **says**: points on a tile, locked state, **live score**, **the opinion card**, who is highlighted in the table |
+| `integration` | 196 | Permissions and RLS against a real DB, both leaderboards, **the live layer**, **advisor quotas** and the admin dashboard |
+| `e2e` | 27 | The full journey in a browser — sign-up → league → prediction → **live match** → **advisor** → settlement → standings |
 
-**554 בדיקות.** בדיקות האינטגרציה בונות עולם חד-פעמי משלהן ומוחקות אותו בסוף.
+**554 tests.** The integration tests build their own disposable world and delete
+it at the end.
 
-בין אלה, 62 בדיקות שייכות ליועץ — ואף אחת מהן אינה קוראת ל-Gemini. השכבה
-הדטרמיניסטית נבדקת ממצה דווקא **משום** שהיא ניתנת לכך: אין בה רשת ואין בה מודל.
+Of these, 77 tests belong to the advisor — and not one of them calls Gemini.
+The deterministic layer is tested exhaustively precisely **because** it can be:
+there is no network in it and no model.
 
 ---
 
-## הסטאק
+## The stack
 
-| שכבה | טכנולוגיה | למה |
+| Layer | Technology | Why |
 |---|---|---|
-| Framework | **Next.js 16.3** (App Router) | Server Components — הנתונים נשלפים בשרת ולא נשלחים ללקוח |
-| שפה | **TypeScript 5** | |
-| DB + Auth | **Supabase** (PostgreSQL 17.6) | RLS מעביר את ההרשאות ל-DB, כך שבאג באפליקציה לא חושף נתונים |
-| אירוח | **Vercel** | |
-| עיצוב | **Tailwind 3.4** + shadcn/ui | 49 קומפוננטות מועתקות מאפליקציית DerbyUp כדי לשמר זהות ויזואלית, ו-11 ערכות צבע לבחירת המשתמש |
-| נתוני כדורגל | **API-Football** | משחקים, תוצאות ויחסים אמיתיים |
-| בדיקות | **Vitest · RTL · Playwright** | |
+| Framework | **Next.js 16.3** (App Router) | Server Components — data is fetched on the server and not shipped to the client |
+| Language | **TypeScript 5** | |
+| DB + Auth | **Supabase** (PostgreSQL 17.6) | RLS moves authorization into the DB, so an application bug cannot leak data |
+| Hosting | **Vercel** | |
+| Styling | **Tailwind 3.4** + shadcn/ui | 49 components carried over from the DerbyUp app to preserve its visual identity, and 9 colour themes for the user to pick from |
+| Football data | **API-Football** | Real fixtures, results and odds |
+| Testing | **Vitest · RTL · Playwright** | |
 
 ---
 
-## איך זה בנוי
+## How it's built
 
 ```
-app/                    מסלולים — (auth) ציבורי · (app) מוגן · api/cron
-components/             UI; components/ui הוא shadcn vendored
+app/                    routes — (auth) public · (app) protected · (admin) site admin · api/cron
+components/             UI; components/ui is vendored shadcn
 lib/
-  domain/               ★ הליבה — פונקציות טהורות, בלי I/O
-  actions/              Server Actions — שכבת הכתיבה היחידה
-  cron/                 סנכרון משחקים · תוצאות חיות · עיבוד
-  live/                 קריאת השכבה החיה לעמוד הליגה
-  football-api/         לקוח API-Football ומיפוי
-  validation/           סכימות Zod
-supabase/migrations/    16 מיגרציות — 12 טבלאות · 20 policies · 26 פונקציות
+  domain/               ★ the core — pure functions, no I/O
+  actions/              Server Actions — the only write layer
+  advisor/              AI advisor: guards, prompt building, schema
+  cron/                 fixture sync · live scores · settlement
+  live/                 the live layer's read path for the league page
+  football-api/         API-Football client and mapping
+  validation/           Zod schemas
+supabase/migrations/    22 migrations — 18 tables · 26 policies · 35 functions
 tests/                  unit · components · integration · e2e
-scripts/                seed · בניית בנק האתגרים · תחזוקה
+scripts/                seed · puzzle-bank build · maintenance
 ```
 
-### ארבע החלטות שמסבירות את רוב הקוד
+### Four decisions that explain most of the code
 
-**1. הדירוג מחושב, לא מאוחסן.** `league_standings` סוכמת את הניחושים בכל קריאה.
-עמודה שמורה הייתה מהירה יותר, אבל היא **יכולה לסטות** מהנתונים — וטבלת דירוג
-שסותרת את היסטוריית הניחושים היא באג שאי אפשר להסביר לעובד. נמדד: 200 חברים
-ב-38ms. ראה `docs/05-scale.md` §10.
+**1. Standings are computed, not stored.** `league_standings` sums the
+predictions on every call. A stored column would have been faster, but it **can
+drift** from the data — and a standings table that contradicts the prediction
+history is a bug you cannot explain to an employee. Measured: 200 members in
+38ms (see the scale document, submitted separately).
 
-**2. `predictions` סגורה לכתיבה ישירה.** אין policy ל-UPDATE ואין ל-DELETE.
-ביטול עובר דרך `cancel_prediction()` — פונקציה אחת עם שלוש בדיקות. policy רחב
-מספיק כדי לאפשר ביטול היה מאפשר גם לשכתב את התוצאה שנבחרה **אחרי** שהמשחק נגמר.
+**2. `predictions` is closed to direct writes.** There is no UPDATE policy and
+no DELETE policy. Cancellation goes through `cancel_prediction()` — one function
+with three checks. A policy broad enough to allow cancellation would also allow
+rewriting the chosen outcome **after** the match ended.
 
-**3. היחס מוקפא ברגע הניחוש.** היחס מועתק לשורת הניחוש; קריאה מחדש בעיבוד הייתה
-מאפשרת ליחס שזז לשנות ניקוד שכבר נקבע.
+**3. The odds are frozen at prediction time.** The odds are copied onto the
+prediction row; re-reading them at settlement would let moving odds change a
+score that was already determined.
 
-**4. השכבה החיה לא מחשבת ניקוד — היא קוראת לעיבוד.** `live-projection.ts` הוא
-עטיפה דקה מעל `settlePrediction`, עם התוצאה הנוכחית במקום הסופית. אפליקציית
-DerbyUp בונה שם את התשלום מחדש ומבטיחה בהערה שהיא "משכפלת ב-100% את הנוסחה" —
-הבטחה שמחזיקה עד לעריכה הראשונה שנוגעת רק באחד מהשניים. בדיקה אחת מאמתת את
-השוויון על 144 צירופים; בדיקת אינטגרציה מאמתת אותו מקצה לקצה מול DB אמיתי.
+**4. The live layer computes no points — it calls settlement.**
+`live-projection.ts` is a thin wrapper over `settlePrediction`, with the current
+score in place of the final one. The DerbyUp app rebuilds the payout there and
+promises in a comment that it "mirrors the formula 100%" — a promise that holds
+until the first edit that touches only one of the two. One test verifies the
+equivalence across 168 combinations; an integration test verifies it end-to-end
+against a real DB.
 
-### האתגר היומי — גשר הכדורגל
+### The daily challenge — the football bridge
 
-שני מועדונים, מצאו שחקן ששיחק בשניהם. 3 ניסיונות, 5/3/1 נקודות **ללידרבורד
-הכללי בלבד**.
+Two clubs; find a player who played for both. 3 attempts, 5/3/1 points — **for
+the global leaderboard only**.
 
-בנק של **141 פאזלים** ו-**4,310 שחקנים** נבנה offline מדאטה-סט Transfermarkt
-(`scripts/build-puzzle-bank.mjs`, זורם על 1.8 מיליון שורות) ונזרע מראש. **אפס
-קריאות ל-AI** — לא בבנייה ולא בזמן אמת.
+A bank of **141 puzzles** and **4,310 players** was built offline from a
+Transfermarkt dataset (`scripts/build-puzzle-bank.mjs`, streaming over 1.8
+million rows) and seeded ahead of time. **Zero AI calls** — neither at build
+time nor at runtime.
 
 ---
 
-## תזמון
+## Scheduling
 
-| עבודה | תדירות | מתזמן |
+| Job | Frequency | Scheduler |
 |---|---|---|
-| `/api/cron/sync-fixtures` | יומי `0 4 * * *` | Vercel Cron |
-| `/api/cron/settle` | כל 10 דקות | **pg_cron** בתוך Supabase |
-| `/api/cron/sync-live` | כל דקה — ורק כשיש משחק | **pg_cron** בתוך Supabase |
-| `/api/cron/advisor-pick` | יומי `0 5 * * *` | Vercel Cron |
+| `/api/cron/sync-fixtures` | daily `0 4 * * *` | Vercel Cron |
+| `/api/cron/settle` | every 10 minutes | **pg_cron** inside Supabase |
+| `/api/cron/sync-live` | every minute — and only while a match is live | **pg_cron** inside Supabase |
+| `/api/cron/advisor-pick` | daily `0 5 * * *` | Vercel Cron |
 
-העיבוד מתוזמן מה-DB ולא מ-Vercel כי מסלול Hobby מאפשר **תזמון יומי בלבד**, וזה
-לא מספיק למשחק שנגמר ב-22:50. `pg_net` שולח את ה-POST והסוד נקרא מ-Vault.
+Settlement is scheduled from the DB and not from Vercel because the Hobby plan
+allows **daily scheduling only**, which is not enough for a match that ends at
+22:50. `pg_net` sends the POST and the secret is read from Vault. A daily
+Vercel run at 4:30 remains as a backstop.
 
 ---
 
-## תיעוד
+## Documentation
 
-מסמכי ההגשה המלאים (איפיון מוצר · ארכיטקטורה · תכנון טכני · אפיון בדיקות ·
-סקייל · אבטחה) מוגשים **בנפרד** ואינם בריפו.
+The full submission documents (product spec · architecture · technical design ·
+test spec · scale · security) are submitted **separately** and are not in the
+repository.
 
-מה שכן כאן — [`docs/planning/`](docs/planning/):
-
-| קובץ | מה יש בו |
-|---|---|
-| [תוכנית-עבודה.md](docs/planning/%D7%AA%D7%95%D7%9B%D7%A0%D7%99%D7%AA-%D7%A2%D7%91%D7%95%D7%93%D7%94.md) | מבט על העבודה כולה — מה נמסר, מה נשאר, לוח זמנים וסיכונים |
-| [תוכנית-מימוש.md](docs/planning/%D7%AA%D7%95%D7%9B%D7%A0%D7%99%D7%AA-%D7%9E%D7%99%D7%9E%D7%95%D7%A9.md) | המימוש שלב-אחר-שלב, שלוש ביקורות, ו**יומן של 102 החלטות** |
-| [החלטות-פיצרים.md](docs/planning/%D7%94%D7%97%D7%9C%D7%98%D7%95%D7%AA-%D7%A4%D7%99%D7%A6%D7%A8%D7%99%D7%9D.md) | מה נכנס להיקף ומה לא, ולמה |
-
-**יומן ההחלטות הוא המסמך המעניין.** לכל החלטה טכנית — למה הדירוג מחושב ולא
-מאוחסן, למה אין policy ל-UPDATE על `predictions`, למה pg_cron ולא Vercel Cron —
-יש שם שורה עם הנימוק, לרוב יחד עם הבאג שגרם לה.
+What is here — [`docs/`](docs/): the defense presentation and the course brief.
