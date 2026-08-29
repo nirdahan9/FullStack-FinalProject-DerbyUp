@@ -177,6 +177,8 @@
    Swatches read `--swatch-a`/`--swatch-b`, falling back to
    `--primary`/`--accent` — a theme overrides the pair when its dot should
    show something other than the working palette (Israel shows the flag).
+   Such an override must be guarded with `:not(html)`, or the active theme
+   would hand its pair down to every swatch by inheritance.
 
    Unlayered and last in the file: `:root` and `.dark` sit in Tailwind's base
    layer, so at equal specificity source order decides, and these win.
@@ -332,7 +334,15 @@
   --background: 0 0% 100%;
   --card: 209 40% 97%;
   --border: 209 30% 90%;
-  /* The dot in the picker shows the flag — תכלת ולבן — not the page accent. */
+}
+
+/* The dot in the picker shows the flag — תכלת ולבן — not the page accent.
+   Guarded off <html>: custom properties inherit, so defining these on the
+   root while Israel is active would reach every other swatch too — their
+   `var(--swatch-a, --primary)` fallback only fires when the property is
+   undefined, and an inherited value counts as defined. Only the swatch
+   elements themselves may carry the pair. */
+.theme-israel:not(html) {
   --swatch-a: 209 60% 66%;
   --swatch-b: 0 0% 100%;
 }
