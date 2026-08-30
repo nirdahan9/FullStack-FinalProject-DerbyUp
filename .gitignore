@@ -1,25 +1,26 @@
 # ---------------------------------------------------------------
 # docs/ — everything written rather than built.
 #
-#   docs/*.md            submission documents, handed in separately
+#   docs/*.md            working notes, handed in separately
 #   docs/assignment/     the course brief
-#   docs/planning/       ✅ TRACKED — the work plan, the implementation plan
-#                        and the decision log. They record why the product is
-#                        built the way it is, which is exactly what the
-#                        assignment asks to be able to explain.
 #
 # `docs/*` rather than `docs/`: git cannot re-include a path whose parent
-# directory is excluded, so the negation below only works if the directory
+# directory is excluded, so the negations below only work if the directory
 # itself is never matched.
 # ---------------------------------------------------------------
 docs/*
 !docs/planning/
 *.docx
 *.doc
-# tracked by name: the defense deck and the course brief
+# tracked by name: the defense deck and the submission documents
 !docs/DerbyUp-Presentation.pptx
 !docs/מטלת סיום.docx
-!docs/מטלת סיום - תוספות ועדכונים.docx
+!docs/מטלת סיום - מעודכן.docx
+!docs/מסמך איפיון מוצר.docx
+!docs/תכנון טכני.docx
+!docs/מסמך איפיון בדיקות.docx
+!docs/מסמך סקייל.docx
+!docs/מסמך אבטחה.docx
 
 # ---------------------------------------------------------------
 # Secrets — never commit
