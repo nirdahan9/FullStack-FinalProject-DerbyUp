@@ -11,7 +11,7 @@ import { NextResponse, type NextRequest } from "next/server";
  */
 const PUBLIC_PATHS = ["/", "/login", "/signup", "/auth"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -68,7 +68,7 @@ export const config = {
     // Everything except Next internals, static assets, and the cron routes.
     //
     // /api/cron/* must be excluded: it has no session to refresh, and this
-    // middleware would redirect the unauthenticated request to /login — so the
+    // proxy would redirect the unauthenticated request to /login — so the
     // scheduled job would return 307 and quietly never run.
     "/((?!api/cron|_next/static|_next/image|favicon.svg|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico)$).*)",
   ],

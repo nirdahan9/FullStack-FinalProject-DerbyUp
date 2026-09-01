@@ -4,7 +4,7 @@ import { admin, E2EWorld, sessionCookie, type E2EUser } from "./fixtures";
 /**
  * §5.3 — route protection, and §8.3.1–2.
  *
- * The middleware is a convenience layer, not the security boundary: a bug here
+ * The proxy (proxy.ts) is a convenience layer, not the security boundary: a bug here
  * changes what a page shows, never what the database returns. It is still worth
  * asserting, because a guest landing on an app route with no data is a broken
  * experience even when nothing leaked.

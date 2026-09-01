@@ -57,7 +57,7 @@ export async function signUp(
   // The project runs with autoconfirm on, so signUp returns a session and the
   // user is in straight away. If that setting is ever turned off, Supabase
   // returns a user with no session instead — redirecting then would bounce off
-  // the middleware straight back to /login with nothing explaining why.
+  // the proxy straight back to /login with nothing explaining why.
   if (!data.session) {
     return actionError("החשבון נוצר. יש לאמת את כתובת האימייל לפני ההתחברות");
   }
@@ -89,7 +89,7 @@ export async function signIn(
 
   if (error) return actionError(friendlyAuthError(error.message));
 
-  // `next` comes from the middleware redirect. Only a path is accepted:
+  // `next` comes from the proxy redirect. Only a path is accepted:
   // taking an absolute URL here would turn the login form into an open
   // redirect that could bounce a user to another site after signing in.
   const next = formData.get("next");

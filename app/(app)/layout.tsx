@@ -7,9 +7,9 @@ import { Toaster } from "@/components/ui/sonner";
 /**
  * Shell for every signed-in route.
  *
- * The middleware already redirects anonymous visitors, but the profile is
- * loaded here anyway and the session re-checked: this layout needs the row to
- * render the bar, and relying on the middleware alone would mean trusting a
+ * The proxy (proxy.ts) already redirects anonymous visitors, but the profile
+ * is loaded here anyway and the session re-checked: this layout needs the row
+ * to render the bar, and relying on the proxy alone would mean trusting a
  * redirect for data access.
  */
 export default async function AppLayout({
