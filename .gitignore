@@ -12,15 +12,9 @@ docs/*
 !docs/planning/
 *.docx
 *.doc
-# tracked by name: the defense deck and the submission documents
-!docs/DerbyUp-Presentation.pptx
-!docs/מטלת סיום.docx
-!docs/מטלת סיום - מעודכן.docx
-!docs/מסמך איפיון מוצר.docx
-!docs/תכנון טכני.docx
-!docs/מסמך איפיון בדיקות.docx
-!docs/מסמך סקייל.docx
-!docs/מסמך אבטחה.docx
+*.pptx
+# tracked: the submission documents and the deck, as PDF only
+!docs/*.pdf
 
 # ---------------------------------------------------------------
 # Secrets — never commit
