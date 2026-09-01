@@ -18,7 +18,7 @@ predicts the outcomes of real football matches, and the standings update on
 their own.
 
 **The problem it solves:** team-building that requires coordination — a fun day,
-a tournament, a team evening — costs money and time, and happens twice a year. A
+a tournament, a team evening — costs money and time, and happens not so many times a year. A
 prediction league runs **in the background every week**, takes no time away from
 work, and gives employees a reason to talk to each other.
 
@@ -32,36 +32,14 @@ explains half the architecture: there is no transactions table, no
 multi-table transaction, and no state in which a user is "stuck" and unable to
 participate.
 
-### Two leaderboards
-
-| | 🏆 League standings | 🌍 Site leaderboard |
-|---|---|---|
-| Who | League members | All users |
-| What counts | **Match-winner picks only** | All three question types + the daily challenge |
-| Since when | Since joining the league | Since signing up |
-| Implementation | **Computed** from predictions | Cached column |
-
-League standings stay simple and legible — everyone predicts who wins, and an
-employee who doesn't know what Over/Under means is not left behind. The global
-leaderboard measures the full depth.
-
-### 🎯 Exact score — ×3 bonus
-
-Alongside the match-winner pick you can also predict the exact score. Hit both —
-**3× the points**. Hit only the winner — **the full regular payout**. Missing
-costs nothing, so there is never a reason not to try.
-
 ### ✨ AI advisor — an opinion before you pick
 
 Before any prediction you can open the advisor and get a **reasoned opinion in
-Hebrew**: what it thinks will happen and why, in football language rather than
-statistics language. You can also ask it follow-up questions about the same
-match.
+Hebrew**: what it thinks will happen and why. 
+You can also ask it follow-up questions about the same match.
 
 It draws on the odds, recent form, past meetings, and how the league's members
-have predicted — and fills in the gaps from API-Football. **It recommends by
-expected points, not by the favourite**, which follows directly from the scoring
-model: when there is nothing to lose, high odds are worth more.
+have predicted — and fills in the gaps from API-Football and Gemini.
 
 Three guard layers keep it on topic — deterministic rules (free), a cheap
 classifier, and a schema that verifies the recommendation points at a bet that
@@ -71,18 +49,6 @@ Every morning one **match per tournament** is also selected — the least
 predictable by odds gap — and analysed ahead of time by cron. That match is the
 one shown on the dashboard and the landing page, so neither screen costs
 anything or waits on a model.
-
-### 🔴 Live scores — and the standings move with them
-
-A match that has kicked off doesn't disappear. The score and the minute update
-**every minute**, and every affected prediction shows the points it would earn
-if the match ended right now — displayed **in green, as a separate addition**
-next to the total, because an 88th-minute equaliser takes them back.
-
-**The live layer writes no points.** It calls `settlePrediction` — the **same
-function** settlement calls — with the current score instead of the final one.
-So the number on screen during the match is the number written to the standings
-after it, not "almost".
 
 ### 🛡️ Two kinds of admin
 
@@ -99,13 +65,43 @@ role themselves — **the service-role key never enters any user-facing path.**
 
 ## Running locally
 
-### Prerequisites
+### Quick start — for graders
+
+The repository contains no secrets. The submission that accompanies it includes
+a ready `.env.local` pointing at the project's live, already-seeded Supabase —
+so there is nothing to create, migrate, seed or fill in:
+
+```bash
+git clone https://github.com/nirdahan9/FullStack-FinalProject-DerbyUp.git
+cd FullStack-FinalProject-DerbyUp
+# → copy the provided .env.local into this folder (it's a hidden file:
+#   Cmd+Shift+. in Finder, or "Show hidden items" in Explorer)
+bash run.sh        # Windows: run.bat
+```
+
+The script checks Node 20+, installs, builds, and serves the production build
+at **http://localhost:3000** — then opens the browser. Sign in with the
+credentials provided in the submission, or sign up as a new user. Fixtures,
+odds, live scores and settlement all keep flowing, because the scheduled jobs
+run on the Supabase side, not on your machine.
+
+> **Tip:** clone into a folder that is *not* synced by iCloud/OneDrive (e.g.
+> your home folder, not Documents/Desktop). Sync services choke on
+> `node_modules` and make every step several times slower.
+
+### Full setup from scratch
+
+Everything below creates an independent environment — your own Supabase
+project and your own data. It is **not needed for grading**; it documents how
+the production environment itself was built.
+
+#### Prerequisites
 
 - **Node.js 20+**
 - A **Supabase** project (free tier is fine)
 - An **API-Football** key from [api-sports.io](https://www.api-football.com/)
 
-### Steps
+#### Steps
 
 ```bash
 # 1. Clone and install
@@ -129,10 +125,6 @@ curl -X POST http://localhost:3000/api/cron/sync-fixtures \
 # 5. Run
 npm run dev                   # http://localhost:3000
 ```
-
-> **Without step 4 the site comes up empty** — there are no matches to predict.
-> The sync pulls the current season of all seven competitions and builds three
-> questions per match.
 
 ### Environment variables
 
@@ -215,42 +207,9 @@ lib/
 supabase/migrations/    22 migrations — 18 tables · 26 policies · 35 functions
 tests/                  unit · components · integration · e2e
 scripts/                seed · puzzle-bank build · maintenance
+proxy.ts                runs before every request — refreshes the session, guards the app routes
+run.sh · run.bat        one-command local run (install → build → serve on :3000)
 ```
-
-### Four decisions that explain most of the code
-
-**1. Standings are computed, not stored.** `league_standings` sums the
-predictions on every call. A stored column would have been faster, but it **can
-drift** from the data — and a standings table that contradicts the prediction
-history is a bug you cannot explain to an employee. Measured: 200 members in
-38ms (see the scale document, submitted separately).
-
-**2. `predictions` is closed to direct writes.** There is no UPDATE policy and
-no DELETE policy. Cancellation goes through `cancel_prediction()` — one function
-with three checks. A policy broad enough to allow cancellation would also allow
-rewriting the chosen outcome **after** the match ended.
-
-**3. The odds are frozen at prediction time.** The odds are copied onto the
-prediction row; re-reading them at settlement would let moving odds change a
-score that was already determined.
-
-**4. The live layer computes no points — it calls settlement.**
-`live-projection.ts` is a thin wrapper over `settlePrediction`, with the current
-score in place of the final one. The DerbyUp app rebuilds the payout there and
-promises in a comment that it "mirrors the formula 100%" — a promise that holds
-until the first edit that touches only one of the two. One test verifies the
-equivalence across 168 combinations; an integration test verifies it end-to-end
-against a real DB.
-
-### The daily challenge — the football bridge
-
-Two clubs; find a player who played for both. 3 attempts, 5/3/1 points — **for
-the global leaderboard only**.
-
-A bank of **141 puzzles** and **4,310 players** was built offline from a
-Transfermarkt dataset (`scripts/build-puzzle-bank.mjs`, streaming over 1.8
-million rows) and seeded ahead of time. **Zero AI calls** — neither at build
-time nor at runtime.
 
 ---
 
@@ -275,5 +234,3 @@ Vercel run at 4:30 remains as a backstop.
 The full submission documents (product spec · architecture · technical design ·
 test spec · scale · security) are submitted **separately** and are not in the
 repository.
-
-What is here — [`docs/`](docs/): the defense presentation and the course brief.
