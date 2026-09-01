@@ -28,6 +28,8 @@ docs/*
 .env
 .env.*
 !.env.example
+# submission-ZIP-only run script; carries the real keys
+setup-and-run.mjs
 *.pem
 *.p8
 *.key
