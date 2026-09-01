@@ -67,25 +67,24 @@ role themselves — **the service-role key never enters any user-facing path.**
 
 ### Quick start — for graders
 
-The repository contains no secrets. The submission that accompanies it includes
-a ready `.env.local` pointing at the project's live, already-seeded Supabase —
-so there is nothing to create, migrate, seed or fill in:
+The repository contains no secrets. The submission ZIP holds this whole
+project plus one extra file — `setup-and-run.mjs` — which carries the
+project's keys and is deliberately git-ignored, so it exists only in the ZIP.
+From the extracted folder, with Node 20+ installed:
 
 ```bash
-git clone https://github.com/nirdahan9/FullStack-FinalProject-DerbyUp.git
-cd FullStack-FinalProject-DerbyUp
-# → copy the provided .env.local into this folder (it's a hidden file:
-#   Cmd+Shift+. in Finder, or "Show hidden items" in Explorer)
-bash run.sh        # Windows: run.bat
+node setup-and-run.mjs
 ```
 
-The script checks Node 20+, installs, builds, and serves the production build
-at **http://localhost:3000** — then opens the browser. Sign in with the
-credentials provided in the submission, or sign up as a new user. Fixtures,
-odds, live scores and settlement all keep flowing, because the scheduled jobs
-run on the Supabase side, not on your machine.
+The script writes `.env.local`, installs, builds once, serves the production
+build at **http://localhost:3000** — then opens the browser. It points at the
+project's live, already-seeded Supabase, so there is nothing to create,
+migrate, seed or fill in. Sign in with the credentials provided in the
+submission, or sign up as a new user. Fixtures, odds, live scores and
+settlement all keep flowing, because the scheduled jobs run on the Supabase
+side, not on your machine.
 
-> **Tip:** clone into a folder that is *not* synced by iCloud/OneDrive (e.g.
+> **Tip:** extract into a folder that is *not* synced by iCloud/OneDrive (e.g.
 > your home folder, not Documents/Desktop). Sync services choke on
 > `node_modules` and make every step several times slower.
 
@@ -208,7 +207,6 @@ supabase/migrations/    22 migrations — 18 tables · 26 policies · 35 functio
 tests/                  unit · components · integration · e2e
 scripts/                seed · puzzle-bank build · maintenance
 proxy.ts                runs before every request — refreshes the session, guards the app routes
-run.sh · run.bat        one-command local run (install → build → serve on :3000)
 ```
 
 ---
