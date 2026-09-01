@@ -1,6 +1,6 @@
 # DerbyUp — Football Predictions for Organizations
 
-**Final Project · Internet Technologies: Become a Full-Stack Engineer · RUNI CS 2026**
+**Final Project · Internet Technologies and Full-Stack Development · RUNI CS 2026**
 **Authors:** Nir Dahan & Liav Sarfati
 
 | | |
