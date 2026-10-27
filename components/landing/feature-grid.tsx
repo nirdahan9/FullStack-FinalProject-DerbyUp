@@ -10,6 +10,7 @@ import {
   Star,
   Trophy,
 } from "lucide-react";
+import { THEME_COLORS } from "@/lib/theme-colors";
 import { ThemeSwatches } from "@/components/landing/theme-swatches";
 
 /**
@@ -136,7 +137,7 @@ export function FeatureGrid() {
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <span className="flex items-center gap-2 font-bold">
             <Palette className="h-5 w-5 shrink-0 text-primary" aria-hidden />
-            אחת עשרה ערכות צבע
+            {THEME_COLORS.length - 1} ערכות צבע
           </span>
           <p className="text-sm leading-relaxed text-muted-foreground">
             צבעי המועדון שלכם על כל האתר. בחרו אחת — הדף הזה ישנה צבע עכשיו,
