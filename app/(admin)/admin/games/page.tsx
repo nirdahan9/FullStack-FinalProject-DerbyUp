@@ -6,6 +6,7 @@ import { SettleGameDialog } from "@/components/site-admin/settle-game-dialog";
 import { FixtureLabel, FixtureScore } from "@/components/shared/fixture";
 import { Pagination } from "@/components/shared/pagination";
 import { formatDateTime, formatNumber } from "@/lib/format";
+import { DEMO_NOW } from "@/lib/demo/now";
 import {
   Table,
   TableBody,
@@ -15,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 100;
 
 /**
  * Every fixture in the database, with how many people are exposed to it.
@@ -24,22 +25,21 @@ const PAGE_SIZE = 25;
  * is the only state on this screen that needs a human: everything else either
  * has not happened or has already settled itself.
  */
-export default async function AdminGamesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{
-    q?: string;
-    status?: string;
-    competition?: string;
-    page?: string;
-  }>;
-}) {
+export default async function AdminGamesPage() {
+  // Static demo: there is no query string to read - the list renders its first
+  // and only page, and defaults to the unsettled view that the real screen
+  // opens on. PAGE_SIZE below is raised to cover the whole snapshot.
   const {
     q,
     status: statusParam,
     competition: competitionParam,
     page: pageParam,
-  } = await searchParams;
+  } = {} as {
+    q?: string;
+    status?: string;
+    competition?: string;
+    page?: string;
+  };
 
   const search = (q ?? "").trim();
   const status = statusParam ?? "unsettled";
@@ -142,7 +142,7 @@ export default async function AdminGamesPage({
                   <TableCell>
                     {/* Offered only once a fixture has started: the function
                         refuses a result for a match people can still predict. */}
-                    {new Date(g.kickoff_at) < new Date() && !g.settled_at && (
+                    {new Date(g.kickoff_at) < DEMO_NOW && !g.settled_at && (
                       <SettleGameDialog
                         gameId={g.id}
                         homeTeam={g.home_team}

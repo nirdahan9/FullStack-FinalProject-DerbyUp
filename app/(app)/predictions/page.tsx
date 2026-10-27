@@ -6,7 +6,7 @@ import { isExactScoreHit } from "@/lib/domain/exact-score";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Pagination } from "@/components/shared/pagination";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 100;
 
 const STATUS: Record<string, { label: string; className: string }> = {
   pending: { label: "ממתין", className: "bg-secondary text-muted-foreground" },
@@ -21,12 +21,11 @@ const OUTCOME_LABELS: Record<string, string> = {
   over: "מעל 2.5", under: "מתחת ל-2.5", yes: "כן", no: "לא",
 };
 
-export default async function PredictionsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string }>;
-}) {
-  const { page: pageParam } = await searchParams;
+export default async function PredictionsPage() {
+    // Static demo: there is no query string to read - every list renders its
+    // first and only page, unfiltered. PAGE_SIZE below is raised to cover the
+    // whole snapshot so nothing hides behind a page that cannot be reached.
+  const { page: pageParam } = {} as { page?: string };
   const page = Math.max(1, Number(pageParam) || 1);
   const from = (page - 1) * PAGE_SIZE;
 

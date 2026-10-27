@@ -4,7 +4,7 @@ import { LeaderboardTable } from "@/components/leagues/leaderboard-table";
 import { Pagination } from "@/components/shared/pagination";
 import type { ScoreRow } from "@/lib/domain/standings";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 100;
 
 /**
  * The site-wide board. Deliberately the mirror image of a league table: every
@@ -16,12 +16,11 @@ const PAGE_SIZE = 20;
  * with, which is right — so instead of widening it, that function returns a
  * display name, an avatar and a score, and nothing that identifies anyone.
  */
-export default async function LeaderboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string }>;
-}) {
-  const { page: pageParam } = await searchParams;
+export default async function LeaderboardPage() {
+    // Static demo: there is no query string to read - every list renders its
+    // first and only page, unfiltered. PAGE_SIZE below is raised to cover the
+    // whole snapshot so nothing hides behind a page that cannot be reached.
+  const { page: pageParam } = {} as { page?: string };
   const page = Math.max(1, Number(pageParam) || 1);
 
   const supabase = await createClient();

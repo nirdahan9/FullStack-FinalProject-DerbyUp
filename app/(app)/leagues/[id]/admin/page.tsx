@@ -6,6 +6,8 @@ import { FeaturedGamePicker } from "@/components/admin/featured-game-picker";
 import { ManualSettle } from "@/components/admin/manual-settle";
 import { PrizesEditor } from "@/components/admin/prizes-editor";
 import type { Prize } from "@/components/leagues/prize-list";
+import { DEMO_NOW } from "@/lib/demo/now";
+import { LEAGUES } from "@/lib/demo/fixtures";
 
 export default async function LeagueAdminPage({
   params,
@@ -33,7 +35,7 @@ export default async function LeagueAdminPage({
     redirect(`/leagues/${id}`);
   }
 
-  const now = new Date().toISOString();
+  const now = DEMO_NOW.toISOString();
 
   const [{ data: upcoming }, { data: unsettled }] = await Promise.all([
     supabase
@@ -104,4 +106,13 @@ export default async function LeagueAdminPage({
       <ManualSettle leagueId={id} games={(unsettled ?? []).map(toGame)} />
     </div>
   );
+}
+
+/**
+ * Under `output: "export"` every dynamic route has to name its pages at build
+ * time. There is no database to ask, so the list is all three, so the admin view is reachable for each - the same frozen
+ * snapshot the page itself reads.
+ */
+export function generateStaticParams() {
+  return LEAGUES.map((league) => ({ id: league.id }));
 }

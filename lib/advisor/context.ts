@@ -1,6 +1,7 @@
 import { resolveClient, type AdvisorClient } from "./db";
 import { translateTeam } from "@/lib/i18n/teams";
 import { fetchProviderHistory } from "./football";
+import { DEMO_NOW } from "@/lib/demo/now";
 import type {
   AdvisorQuestion,
   CrowdSplit,
@@ -118,7 +119,7 @@ function israelMidnight(daysFromToday: number, now: Date): Date {
 }
 
 /** `[from, to)` in absolute time; `to` stays open for "all". */
-function kickoffWindow(range: RangeKey, now = new Date()): { from: Date; to: Date | null } {
+function kickoffWindow(range: RangeKey, now = DEMO_NOW): { from: Date; to: Date | null } {
   switch (range) {
     // Always from *now*, never from midnight: a match that kicked off two
     // hours ago is not one anybody wants advice on.

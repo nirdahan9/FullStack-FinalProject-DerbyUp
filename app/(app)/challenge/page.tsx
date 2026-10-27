@@ -2,6 +2,7 @@ import { Gamepad2 } from "lucide-react";
 import { createClient } from "@/lib/demo/client";
 import { PuzzleBoard } from "@/components/challenge/puzzle-board";
 import { EmptyState } from "@/components/shared/empty-state";
+import { DEMO_NOW } from "@/lib/demo/now";
 
 /**
  * Today's Football Bridge puzzle.
@@ -15,7 +16,7 @@ function todayInIsrael(): string {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(new Date());
+  }).format(DEMO_NOW);
 }
 
 export default async function ChallengePage() {

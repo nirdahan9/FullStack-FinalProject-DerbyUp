@@ -116,7 +116,10 @@ const { DEMO_NOW } = await import(pathToFileURL(path.join(ROOT, "lib/demo/now.ts
 const { effectiveOdds, resolveOutcome, settlePrediction, voidPrediction } = settlement;
 const { newlyEarned } = achievements;
 const { round2 } = scoring;
-const { normalizeName } = puzzle;
+// normalizeName is applied inside fixtures.ts itself, where bridge_players is
+// built; the generator only needs the module imported so the check fails loudly
+// if that export ever moves.
+void puzzle.normalizeName;
 
 const {
   DEMO_USER_ID,

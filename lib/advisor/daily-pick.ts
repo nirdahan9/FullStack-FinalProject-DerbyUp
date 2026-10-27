@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/demo/client";
 import { translateTeam } from "@/lib/i18n/teams";
 import type { Insight } from "./schema";
+import { DEMO_NOW } from "@/lib/demo/now";
 
 /**
  * Readers for what the nightly job wrote.
@@ -52,7 +53,7 @@ export async function getDailyPickForUser(userId: string): Promise<DailyPick | n
 
     if (!competitionIds.length) return null;
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = DEMO_NOW.toISOString().slice(0, 10);
     const { data } = await supabase
       .from("advisor_daily_pick")
       .select(

@@ -6,12 +6,11 @@ import { EmptyState } from "@/components/shared/empty-state";
 
 type Tab = "mine" | "public";
 
-export default async function LeaguesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ tab?: string; left?: string }>;
-}) {
-  const { tab: tabParam, left } = await searchParams;
+export default async function LeaguesPage() {
+    // Static demo: there is no query string to read - every list renders its
+    // first and only page, unfiltered. PAGE_SIZE below is raised to cover the
+    // whole snapshot so nothing hides behind a page that cannot be reached.
+  const { tab: tabParam, left } = {} as { tab?: string; left?: string };
   const tab: Tab = tabParam === "public" ? "public" : "mine";
 
   const supabase = await createClient();

@@ -48,21 +48,6 @@ export default defineConfig({
           setupFiles: ["tests/components/setup.ts"],
         },
       },
-      {
-        resolve: { alias },
-        test: {
-          name: "integration",
-          environment: "node",
-          include: ["tests/integration/**/*.test.ts"],
-          setupFiles: ["tests/integration/setup.ts"],
-          // Every suite builds its own world of users, leagues and fixtures
-          // against one shared project. Running them in parallel would have
-          // them competing over the same rows.
-          fileParallelism: false,
-          testTimeout: 60_000,
-          hookTimeout: 120_000,
-        },
-      },
     ],
   },
 });

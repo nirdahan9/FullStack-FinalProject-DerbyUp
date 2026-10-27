@@ -1,7 +1,16 @@
-"use server";
+/**
+ * Static demo: this was a Server Action.
+ *
+ * `"use server"` is gone because a static export has no server to run it on,
+ * and the revalidate calls are gone with it - nothing is written, so there is
+ * nothing to invalidate. The functions are otherwise untouched: they still
+ * validate their input with the same schemas and still return the same
+ * ActionResult, so every caller and every error message is unchanged. They now
+ * run in the browser against the frozen snapshot, and succeed without
+ * persisting anything.
+ */
 
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/demo/client";
 import { signInSchema, signUpSchema } from "@/lib/validation/auth";
 import { actionError, type ActionResult } from "./types";
@@ -61,8 +70,6 @@ export async function signUp(
   if (!data.session) {
     return actionError("החשבון נוצר. יש לאמת את כתובת האימייל לפני ההתחברות");
   }
-
-  revalidatePath("/", "layout");
   redirect("/dashboard");
 }
 
@@ -97,14 +104,11 @@ export async function signIn(
     typeof next === "string" && next.startsWith("/") && !next.startsWith("//")
       ? next
       : "/dashboard";
-
-  revalidatePath("/", "layout");
   redirect(target);
 }
 
 export async function signOut(): Promise<never> {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  revalidatePath("/", "layout");
   redirect("/login");
 }

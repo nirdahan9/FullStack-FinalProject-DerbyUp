@@ -26,12 +26,11 @@ const LIST_LIMIT = 40;
  * is information, and a tab that is empty for someone in one league is a tab
  * nobody opens twice.
  */
-export default async function AdvisorPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ competition?: string; range?: string; game?: string }>;
-}) {
-  const params = await searchParams;
+export default async function AdvisorPage() {
+    // Static demo: there is no query string to read - every list renders its
+    // first and only page, unfiltered. PAGE_SIZE below is raised to cover the
+    // whole snapshot so nothing hides behind a page that cannot be reached.
+  const params = {} as { competition?: string; range?: string; game?: string };
   const competition = Number(params.competition) || null;
   const range: RangeKey = isRangeKey(params.range ?? null) ? (params.range as RangeKey) : "week";
   const selectedId = params.game ?? null;

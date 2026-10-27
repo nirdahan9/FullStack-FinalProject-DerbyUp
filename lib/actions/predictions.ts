@@ -1,6 +1,15 @@
-"use server";
+/**
+ * Static demo: this was a Server Action.
+ *
+ * `"use server"` is gone because a static export has no server to run it on,
+ * and the revalidate calls are gone with it - nothing is written, so there is
+ * nothing to invalidate. The functions are otherwise untouched: they still
+ * validate their input with the same schemas and still return the same
+ * ActionResult, so every caller and every error message is unchanged. They now
+ * run in the browser against the frozen snapshot, and succeed without
+ * persisting anything.
+ */
 
-import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/demo/client";
 import {
   cancelPredictionSchema,
@@ -16,6 +25,7 @@ import { pointsForCorrectPrediction, round2 } from "@/lib/domain/scoring";
 import type { Outcome } from "@/lib/football-api/types";
 import type { QuestionType } from "@/lib/domain/types";
 import { actionError, type ActionResult } from "./types";
+import { DEMO_NOW } from "@/lib/demo/now";
 
 const REJECTION_MESSAGES: Record<string, string> = {
   GAME_STARTED: "המשחק כבר התחיל, לא ניתן לנחש",
@@ -98,7 +108,7 @@ export async function makePrediction(
     selectedOutcome: parsed.data.outcome,
     hasExisting: Boolean(existing),
     userCompetitions: leagues.map((l) => l.competition_id),
-    now: new Date(),
+    now: DEMO_NOW,
   });
 
   if (!verdict.ok) return actionError(messageFor(verdict.reason));
@@ -157,10 +167,6 @@ export async function makePrediction(
     return actionError("אירעה שגיאה. נסה שוב");
   }
 
-  revalidatePath(`/games/${game.id}`);
-  revalidatePath("/predictions");
-  revalidatePath("/dashboard");
-
   const base = pointsForCorrectPrediction(chosen.odds, bonusPct);
 
   return {
@@ -198,8 +204,5 @@ export async function cancelPrediction(
     );
     return actionError(reason ? messageFor(reason) : "אירעה שגיאה. נסה שוב");
   }
-
-  revalidatePath("/predictions");
-  revalidatePath("/dashboard");
   return { ok: true, data: undefined };
 }

@@ -6,6 +6,7 @@ import { UserActions } from "@/components/site-admin/user-actions";
 import { Badge } from "@/components/ui/badge";
 import { FixtureLabel } from "@/components/shared/fixture";
 import { formatDateTime, formatNumber, formatPoints } from "@/lib/format";
+import { PROFILES } from "@/lib/demo/fixtures";
 import {
   Table,
   TableBody,
@@ -237,4 +238,13 @@ function Fact({ label, value }: { label: string; value: string }) {
       <dd className="text-sm font-black">{value}</dd>
     </div>
   );
+}
+
+/**
+ * Under `output: "export"` every dynamic route has to name its pages at build
+ * time. There is no database to ask, so the list is all twelve players - the same frozen
+ * snapshot the page itself reads.
+ */
+export function generateStaticParams() {
+  return PROFILES.map((profile) => ({ id: profile.id }));
 }

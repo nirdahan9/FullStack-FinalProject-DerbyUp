@@ -8,15 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --project unit --project components",
-    "test:watch": "vitest --project unit --project components",
-    "test:integration": "vitest run --project integration",
-    "test:all": "vitest run",
-    "test:e2e": "playwright test",
-    "test:coverage": "vitest run --project unit --project components --coverage",
-    "seed": "node scripts/seed-competitions.mjs",
-    "schedule:cron": "node scripts/schedule-settlement.mjs",
-    "test:clean": "node scripts/clean-test-data.mjs"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "fixtures": "node scripts/build-demo-fixtures.mjs --check"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
@@ -47,7 +42,6 @@
     "@radix-ui/react-toggle": "^1.1.18",
     "@radix-ui/react-toggle-group": "^1.1.19",
     "@radix-ui/react-tooltip": "^1.2.16",
-    "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
