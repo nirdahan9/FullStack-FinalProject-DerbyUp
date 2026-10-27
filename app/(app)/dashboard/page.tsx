@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CalendarDays, Target, Trophy } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { GameRow } from "@/components/games/game-row";
 import { EmptyState } from "@/components/shared/empty-state";
 import { DailyPickCard } from "@/components/advisor/daily-pick-card";

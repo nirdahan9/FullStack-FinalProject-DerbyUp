@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { classifyQuestion, REFUSAL_BY_CATEGORY } from "@/lib/advisor/classifier";
 import { buildGameContext, insightCacheKey, loadGameMeta } from "@/lib/advisor/context";
 import { fetchPlayerContext } from "@/lib/advisor/football";

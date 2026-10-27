@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { AdminSearch } from "@/components/site-admin/admin-search";
 import { UserActions } from "@/components/site-admin/user-actions";
 import { SiteAdminsCard, type SiteAdminRow } from "@/components/site-admin/site-admins-card";

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { AdminSearch } from "@/components/site-admin/admin-search";
 import { Pagination } from "@/components/shared/pagination";
 import { Badge } from "@/components/ui/badge";

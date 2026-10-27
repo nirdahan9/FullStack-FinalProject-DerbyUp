@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { TopBar } from "@/components/layout/top-bar";
 import { BottomTabBar } from "@/components/layout/bottom-tab-bar";
 import { Toaster } from "@/components/ui/sonner";

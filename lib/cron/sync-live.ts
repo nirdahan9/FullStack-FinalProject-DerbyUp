@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient } from "@/lib/demo/client";
 import { fetchLiveFixtures } from "@/lib/football-api/client";
 import { COMPETITIONS } from "@/lib/football-api/types";
 

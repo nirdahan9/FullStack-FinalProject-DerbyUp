@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { updateProfileSchema } from "@/lib/validation/schemas";
 import { actionError, type ActionResult } from "./types";
 

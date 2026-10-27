@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Target } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { ExactScore, FixtureLabel } from "@/components/shared/fixture";
 import { isExactScoreHit } from "@/lib/domain/exact-score";
 import { EmptyState } from "@/components/shared/empty-state";

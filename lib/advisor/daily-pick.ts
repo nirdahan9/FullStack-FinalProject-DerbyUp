@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { translateTeam } from "@/lib/i18n/teams";
 import type { Insight } from "./schema";
 

@@ -1,8 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient, createAdminClient } from "@/lib/demo/client";
 import { submitPuzzleAnswerSchema } from "@/lib/validation/schemas";
 import { checkAnswer, MAX_ATTEMPTS, pointsForAttempt } from "@/lib/domain/puzzle";
 import { awardAchievements } from "@/lib/achievements/award";

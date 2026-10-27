@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Star } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { QuestionCard } from "@/components/games/question-card";
 import { AdvisorSheet } from "@/components/advisor/advisor-sheet";
 import { LiveScore } from "@/components/games/live-score";

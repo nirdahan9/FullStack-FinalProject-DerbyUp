@@ -1,5 +1,5 @@
 import { CalendarDays } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { GameRow } from "@/components/games/game-row";
 import { EmptyState } from "@/components/shared/empty-state";
 import { CompetitionTabs } from "@/components/games/competition-tabs";

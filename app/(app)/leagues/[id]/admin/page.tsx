@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Settings } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { FeaturedGamePicker } from "@/components/admin/featured-game-picker";
 import { ManualSettle } from "@/components/admin/manual-settle";
 import { PrizesEditor } from "@/components/admin/prizes-editor";

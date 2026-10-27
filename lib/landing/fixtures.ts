@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import type { Outcome } from "@/lib/football-api/types";
 
 export type LandingGame = {

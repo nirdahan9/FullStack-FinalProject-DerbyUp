@@ -1,5 +1,5 @@
 import { Gamepad2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { PuzzleBoard } from "@/components/challenge/puzzle-board";
 import { EmptyState } from "@/components/shared/empty-state";
 

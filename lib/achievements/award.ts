@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient } from "@/lib/demo/client";
 import { newlyEarned, type AchievementStats } from "@/lib/domain/achievements";
 
 /**

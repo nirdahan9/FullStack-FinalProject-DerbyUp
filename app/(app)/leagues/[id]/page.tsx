@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Globe, Settings, Trophy } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { InviteCodeBox } from "@/components/leagues/invite-code-box";
 import { LeaderboardTable } from "@/components/leagues/leaderboard-table";
 import { LeagueActions } from "@/components/leagues/league-actions";

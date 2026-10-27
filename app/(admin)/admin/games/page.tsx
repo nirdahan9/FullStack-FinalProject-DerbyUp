@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { GameFilters } from "@/components/site-admin/game-filters";
 import { GameStatusBadge } from "@/components/site-admin/game-status-badge";
 import { SettleGameDialog } from "@/components/site-admin/settle-game-dialog";

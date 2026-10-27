@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { UserActions } from "@/components/site-admin/user-actions";
 import { Badge } from "@/components/ui/badge";
 import { FixtureLabel } from "@/components/shared/fixture";

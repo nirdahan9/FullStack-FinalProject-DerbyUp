@@ -1,5 +1,5 @@
 import { Bell, Target, Trophy, Users } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { EmptyState } from "@/components/shared/empty-state";
 import { MarkReadButton } from "@/components/layout/mark-read-button";
 import { NotificationRow } from "@/components/layout/notification-row";

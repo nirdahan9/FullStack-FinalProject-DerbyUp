@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createAdminClient } from "@/lib/demo/client";
 import { buildGameContext } from "@/lib/advisor/context";
 import type { AdvisorClient } from "@/lib/advisor/db";
 import { buildInsightPrompt, DEFAULT_SYSTEM_PROMPT } from "@/lib/advisor/prompts";

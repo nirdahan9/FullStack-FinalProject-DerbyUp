@@ -1,5 +1,5 @@
 import { Globe } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { LeaderboardTable } from "@/components/leagues/leaderboard-table";
 import { Pagination } from "@/components/shared/pagination";
 import type { ScoreRow } from "@/lib/domain/standings";

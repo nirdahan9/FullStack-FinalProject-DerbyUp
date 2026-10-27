@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Globe, LogIn, Plus, Trophy, Users } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
 
