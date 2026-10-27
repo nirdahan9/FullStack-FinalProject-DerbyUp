@@ -3,6 +3,7 @@ import { Heebo } from "next/font/google";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { ThemeColorScript } from "@/components/layout/theme-color-script";
 import "./globals.css";
+import { DemoNotice } from "@/components/shared/demo-notice";
 
 // Same family the DerbyUp app loads from Google Fonts, self-hosted by next/font
 // so it does not cost a render-blocking request.
@@ -62,6 +63,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          {/* Said once, at the top of every page, before anything claims to be
+              live. See the component for why it is not negotiable. */}
+          <DemoNotice />
           {children}
         </ThemeProvider>
       </body>
