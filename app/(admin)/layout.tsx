@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, ShieldCheck, ShieldX } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { AdminNav } from "@/components/site-admin/admin-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Toaster } from "@/components/ui/sonner";

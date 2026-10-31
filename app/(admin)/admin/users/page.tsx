@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { AdminSearch } from "@/components/site-admin/admin-search";
 import { UserActions } from "@/components/site-admin/user-actions";
 import { SiteAdminsCard, type SiteAdminRow } from "@/components/site-admin/site-admins-card";
@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 100;
 
 /**
  * Every account in the product, newest first.
@@ -24,12 +24,11 @@ const PAGE_SIZE = 25;
  * things a user identifies themselves by when they write in — and the email is
  * the only one of them that is unique and that they actually know.
  */
-export default async function AdminUsersPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string; page?: string }>;
-}) {
-  const { q, page: pageParam } = await searchParams;
+export default async function AdminUsersPage() {
+    // Static demo: there is no query string to read - every list renders its
+    // first and only page, unfiltered. PAGE_SIZE below is raised to cover the
+    // whole snapshot so nothing hides behind a page that cannot be reached.
+  const { q, page: pageParam } = {} as { q?: string; page?: string };
   const search = (q ?? "").trim();
   const page = Math.max(1, Number(pageParam) || 1);
 

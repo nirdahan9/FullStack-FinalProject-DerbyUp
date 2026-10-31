@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Globe, Settings, Trophy } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { InviteCodeBox } from "@/components/leagues/invite-code-box";
 import { LeaderboardTable } from "@/components/leagues/leaderboard-table";
 import { LeagueActions } from "@/components/leagues/league-actions";
@@ -11,16 +11,18 @@ import { PrizeList, type Prize } from "@/components/leagues/prize-list";
 import { LiveRefresher } from "@/components/shared/live-refresher";
 import { rankRows, type ScoreRow } from "@/lib/domain/standings";
 import { getLeagueLive } from "@/lib/live/league";
+import { LEAGUES } from "@/lib/demo/fixtures";
 
 export default async function LeaguePage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ created?: string; joined?: string; finished?: string }>;
 }) {
   const { id } = await params;
-  const { created, joined, finished } = await searchParams;
+    // Static demo: there is no query string to read - every list renders its
+    // first and only page, unfiltered. PAGE_SIZE below is raised to cover the
+    // whole snapshot so nothing hides behind a page that cannot be reached.
+  const { created, joined, finished } = {} as { created?: string; joined?: string; finished?: string };
   const showFinished = finished === "1";
 
   const supabase = await createClient();
@@ -243,4 +245,13 @@ export default async function LeaguePage({
       )}
     </div>
   );
+}
+
+/**
+ * Under `output: "export"` every dynamic route has to name its pages at build
+ * time. There is no database to ask, so the list is all three demo leagues - the same frozen
+ * snapshot the page itself reads.
+ */
+export function generateStaticParams() {
+  return LEAGUES.map((league) => ({ id: league.id }));
 }

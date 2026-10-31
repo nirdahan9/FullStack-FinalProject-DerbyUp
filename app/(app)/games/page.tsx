@@ -1,19 +1,19 @@
 import { CalendarDays } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { GameRow } from "@/components/games/game-row";
 import { EmptyState } from "@/components/shared/empty-state";
 import { CompetitionTabs } from "@/components/games/competition-tabs";
 import { Pagination } from "@/components/shared/pagination";
 import { LiveRefresher } from "@/components/shared/live-refresher";
+import { DEMO_NOW } from "@/lib/demo/now";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 100;
 
-export default async function GamesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ page?: string; competition?: string }>;
-}) {
-  const { page: pageParam, competition: competitionParam } = await searchParams;
+export default async function GamesPage() {
+    // Static demo: there is no query string to read - every list renders its
+    // first and only page, unfiltered. PAGE_SIZE below is raised to cover the
+    // whole snapshot so nothing hides behind a page that cannot be reached.
+  const { page: pageParam, competition: competitionParam } = {} as { page?: string; competition?: string };
   const page = Math.max(1, Number(pageParam) || 1);
   const selectedCompetition = Number(competitionParam) || null;
 
@@ -63,7 +63,7 @@ export default async function GamesPage({
     .select("id, home_team, away_team, home_logo, away_logo, kickoff_at, competitions(name)")
     .in("competition_id", visibleIds)
     .eq("status", "scheduled")
-    .gt("kickoff_at", new Date().toISOString())
+    .gt("kickoff_at", DEMO_NOW.toISOString())
     .order("kickoff_at", { ascending: true })
     .range(from, from + PAGE_SIZE);
 

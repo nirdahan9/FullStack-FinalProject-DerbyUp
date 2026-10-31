@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { NewLeagueForm } from "@/components/leagues/new-league-form";
 
 export default async function NewLeaguePage() {

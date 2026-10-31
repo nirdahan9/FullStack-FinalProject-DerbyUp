@@ -1,9 +1,18 @@
-"use server";
+/**
+ * Static demo: this was a Server Action.
+ *
+ * `"use server"` is gone because a static export has no server to run it on,
+ * and the revalidate calls are gone with it - nothing is written, so there is
+ * nothing to invalidate. The functions are otherwise untouched: they still
+ * validate their input with the same schemas and still return the same
+ * ActionResult, so every caller and every error message is unchanged. They now
+ * run in the browser against the frozen snapshot, and succeed without
+ * persisting anything.
+ */
 
-import { revalidatePath } from "next/cache";
 import { awardAchievements } from "@/lib/achievements/award";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { createLeagueSchema, joinLeagueSchema } from "@/lib/validation/schemas";
 import { actionError, type ActionResult } from "./types";
 
@@ -69,8 +78,6 @@ export async function createLeague(
     data: { user },
   } = await supabase.auth.getUser();
   if (user) await awardAchievements(user.id);
-
-  revalidatePath("/leagues");
   redirect(`/leagues/${created.league_id}?created=1`);
 }
 
@@ -98,9 +105,6 @@ export async function joinLeague(
     data: { user },
   } = await supabase.auth.getUser();
   if (user) await awardAchievements(user.id);
-
-  revalidatePath("/leagues");
-  revalidatePath("/games");
   redirect(`/leagues/${data}?joined=1`);
 }
 
@@ -136,8 +140,6 @@ export async function leaveLeague(
     .eq("user_id", user.id);
 
   if (error) return actionError("אירעה שגיאה. נסה שוב");
-
-  revalidatePath("/leagues");
   redirect("/leagues?left=1");
 }
 
@@ -167,7 +169,5 @@ export async function archiveLeague(
     .eq("id", input.leagueId);
 
   if (error) return actionError("אירעה שגיאה. נסה שוב");
-
-  revalidatePath(`/leagues/${input.leagueId}`);
   return { ok: true, data: undefined };
 }

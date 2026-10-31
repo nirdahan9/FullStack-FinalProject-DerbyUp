@@ -1,5 +1,5 @@
 import { Lock } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { SignOutButton } from "@/components/layout/sign-out-button";
 import { EditNameForm } from "@/components/layout/edit-name-form";
 import { ThemeColorPicker } from "@/components/layout/theme-color-picker";

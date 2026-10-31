@@ -1,7 +1,16 @@
-"use server";
+/**
+ * Static demo: this was a Server Action.
+ *
+ * `"use server"` is gone because a static export has no server to run it on,
+ * and the revalidate calls are gone with it - nothing is written, so there is
+ * nothing to invalidate. The functions are otherwise untouched: they still
+ * validate their input with the same schemas and still return the same
+ * ActionResult, so every caller and every error message is unchanged. They now
+ * run in the browser against the frozen snapshot, and succeed without
+ * persisting anything.
+ */
 
-import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { featuredGameSchema, prizesSchema } from "@/lib/validation/schemas";
 import { actionError, type ActionResult } from "./types";
 
@@ -64,8 +73,6 @@ export async function updatePrizes(
     .eq("id", parsed.data.leagueId);
 
   if (dbError) return actionError("אירעה שגיאה. נסה שוב");
-
-  revalidatePath(`/leagues/${parsed.data.leagueId}`);
   return { ok: true, data: undefined };
 }
 
@@ -107,9 +114,6 @@ export async function setFeaturedGame(
     .eq("id", input.leagueId);
 
   if (dbError) return actionError("אירעה שגיאה. נסה שוב");
-
-  revalidatePath(`/leagues/${input.leagueId}`);
-  revalidatePath("/games");
   return { ok: true, data: undefined };
 }
 
@@ -129,8 +133,5 @@ export async function settleGameManually(
   });
 
   if (error) return actionError(adminError(error.message));
-
-  revalidatePath(`/leagues/${input.leagueId}`);
-  revalidatePath(`/games/${input.gameId}`);
   return { ok: true, data: undefined };
 }

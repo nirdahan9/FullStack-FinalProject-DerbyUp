@@ -11,7 +11,7 @@ import {
   UserPlus,
   Users,
 } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { StatCard } from "@/components/site-admin/stat-card";
 import { GameStatusBadge } from "@/components/site-admin/game-status-badge";
 import { SettleGameDialog } from "@/components/site-admin/settle-game-dialog";

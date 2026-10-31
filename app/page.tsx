@@ -10,6 +10,10 @@ import { LandingFooter } from "@/components/landing/landing-footer";
 import { LandingHeader } from "@/components/landing/landing-header";
 import { ScoringModel } from "@/components/landing/scoring-model";
 import { AdvisorPreview } from "@/components/landing/advisor-preview";
+import { OriginStory } from "@/components/landing/origin-story";
+import { ProductGallery } from "@/components/landing/product-gallery";
+import { Traction } from "@/components/landing/traction";
+import { PlatformReach } from "@/components/landing/platform-reach";
 
 /**
  * The landing page — the only route an anonymous visitor sees, and the one
@@ -43,6 +47,15 @@ export default async function Home() {
         <ScoringModel />
         {advisorCard && <AdvisorPreview card={advisorCard} />}
         <FeatureGrid />
+
+        {/* The product this project rebuilds. It ran, it shipped, and it was
+            shut down — told in that order so nobody discovers the dead app
+            store links on their own. */}
+        <OriginStory />
+        <ProductGallery />
+        <Traction />
+        <PlatformReach />
+
         <Faq />
         <FinalCta />
       </main>

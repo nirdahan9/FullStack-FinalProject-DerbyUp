@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pickMostUncertain } from "@/lib/cron/advisor-pick";
+import { pickMostUncertain } from "@/lib/domain/advisor-pick";
 import type { Outcome } from "@/lib/football-api/types";
 
 /**

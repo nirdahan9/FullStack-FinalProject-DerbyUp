@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { CalendarDays, Target, Trophy } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { GameRow } from "@/components/games/game-row";
 import { EmptyState } from "@/components/shared/empty-state";
 import { DailyPickCard } from "@/components/advisor/daily-pick-card";
 import { getDailyPickForUser } from "@/lib/advisor/daily-pick";
+import { DEMO_NOW } from "@/lib/demo/now";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -36,7 +37,7 @@ export default async function DashboardPage() {
         .select("id, home_team, away_team, home_logo, away_logo, kickoff_at, competitions(name)")
         .in("competition_id", competitionIds)
         .eq("status", "scheduled")
-        .gt("kickoff_at", new Date().toISOString())
+        .gt("kickoff_at", DEMO_NOW.toISOString())
         .order("kickoff_at", { ascending: true })
         .limit(5)
     : { data: [] };

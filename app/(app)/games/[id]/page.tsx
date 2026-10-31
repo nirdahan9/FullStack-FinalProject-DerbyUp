@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { Star } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { QuestionCard } from "@/components/games/question-card";
 import { AdvisorSheet } from "@/components/advisor/advisor-sheet";
 import { LiveScore } from "@/components/games/live-score";
@@ -10,6 +10,8 @@ import { CANCEL_WINDOW_MINUTES } from "@/lib/domain/prediction-rules";
 import { FixtureLabel, FixtureScore } from "@/components/shared/fixture";
 import type { QuestionType } from "@/lib/domain/types";
 import type { Outcome } from "@/lib/football-api/types";
+import { DEMO_NOW } from "@/lib/demo/now";
+import { GAMES } from "@/lib/demo/fixtures";
 
 export default async function GamePage({
   params,
@@ -70,7 +72,7 @@ export default async function GamePage({
   );
 
   const kickoff = new Date(game.kickoff_at);
-  const now = new Date();
+  const now = DEMO_NOW;
   const started = now >= kickoff;
   const locked = started || game.status !== "scheduled" || !inCompetition;
 
@@ -217,4 +219,13 @@ export default async function GamePage({
       {game.status === "live" && <LiveRefresher />}
     </div>
   );
+}
+
+/**
+ * Under `output: "export"` every dynamic route has to name its pages at build
+ * time. There is no database to ask, so the list is every fixture in the snapshot - the same frozen
+ * snapshot the page itself reads.
+ */
+export function generateStaticParams() {
+  return GAMES.map((game) => ({ id: game.id }));
 }

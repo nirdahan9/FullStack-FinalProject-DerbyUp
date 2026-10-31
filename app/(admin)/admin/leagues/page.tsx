@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { AdminSearch } from "@/components/site-admin/admin-search";
 import { Pagination } from "@/components/shared/pagination";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 100;
 
 /**
  * Every league, private ones first — the public league per competition is
@@ -25,12 +25,11 @@ const PAGE_SIZE = 25;
  * invite code shown here, which leaves a membership row behind rather than a
  * silent look at somebody's standings.
  */
-export default async function AdminLeaguesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string; page?: string }>;
-}) {
-  const { q, page: pageParam } = await searchParams;
+export default async function AdminLeaguesPage() {
+    // Static demo: there is no query string to read - every list renders its
+    // first and only page, unfiltered. PAGE_SIZE below is raised to cover the
+    // whole snapshot so nothing hides behind a page that cannot be reached.
+  const { q, page: pageParam } = {} as { q?: string; page?: string };
   const search = (q ?? "").trim();
   const page = Math.max(1, Number(pageParam) || 1);
 

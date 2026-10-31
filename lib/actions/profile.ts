@@ -1,7 +1,16 @@
-"use server";
+/**
+ * Static demo: this was a Server Action.
+ *
+ * `"use server"` is gone because a static export has no server to run it on,
+ * and the revalidate calls are gone with it - nothing is written, so there is
+ * nothing to invalidate. The functions are otherwise untouched: they still
+ * validate their input with the same schemas and still return the same
+ * ActionResult, so every caller and every error message is unchanged. They now
+ * run in the browser against the frozen snapshot, and succeed without
+ * persisting anything.
+ */
 
-import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/demo/client";
 import { updateProfileSchema } from "@/lib/validation/schemas";
 import { actionError, type ActionResult } from "./types";
 
@@ -43,6 +52,5 @@ export async function updateProfile(
   if (error) return actionError("אירעה שגיאה. נסה שוב");
 
   // The name shows in the top bar and in every standings table.
-  revalidatePath("/", "layout");
   return { ok: true, data: undefined };
 }

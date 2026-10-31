@@ -11,13 +11,16 @@ const TYPE_LABEL: Record<string, string> = {
 /**
  * The advisor, shown to someone who has not signed up.
  *
- * Everything else on this page is a claim about the product. This is the
- * product: a real analysis of a real fixture, generated last night by the same
- * job that fills the dashboard card, on odds the visitor can check. Nothing
- * here is illustrative and nothing is hard-coded.
+ * Everything else on this page is a claim about the product. This was the
+ * product: a real analysis of a real fixture, generated overnight by the same
+ * job that filled the dashboard card, on odds the visitor could check.
  *
- * It costs one query. The analysis was paid for once, overnight, and every
- * visitor since has been served the same row.
+ * In the static demo it is a stored analysis rather than a generated one - the
+ * model is not called and there is nothing to pay for. The previous version of
+ * this comment said "nothing here is illustrative and nothing is hard-coded",
+ * which stopped being true the moment the insights were frozen. The caption
+ * below was corrected for the same reason: a page that boasts about being real
+ * while serving canned text is worse than one that never boasted.
  */
 export function AdvisorPreview({ card }: { card: LandingAdvisorCard }) {
   return (
@@ -30,7 +33,7 @@ export function AdvisorPreview({ card }: { card: LandingAdvisorCard }) {
           </h2>
           <p className="text-sm text-muted-foreground md:text-base">
             לפני כל ניחוש אפשר לקבל דעה מנומקת — מבוססת על הכושר, המפגשים
-            הקודמים והיחסים עצמם. הנה הניתוח של היום, אמיתי לגמרי:
+            הקודמים והיחסים עצמם. זהו ניתוח שמור מתוך ההדגמה:
           </p>
         </div>
 

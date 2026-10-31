@@ -76,3 +76,6 @@ yarn-error.log*
 # (Vercel CLI appends `.env*` here; the Secrets block above already
 #  covers it and keeps the !.env.example negation effective.)
 coverage/
+
+# Static export output
+/out/
